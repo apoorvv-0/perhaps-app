@@ -89,14 +89,10 @@ export async function POST(request: NextRequest) {
   let user = await prisma.user.findUnique({ where: { googleId } });
 
   if (!user) {
-    user = await prisma.user.create({
-      data: {
-        googleId,
-        phoneNumber: `pending:${googleId}`,
-        globalRole: "USER",
-        status: "ACTIVE",
-      },
-    });
+    return NextResponse.json(
+      { error: "Account not found. You must create a Roviara ID at roviara.com first." },
+      { status: 403 }
+    );
   }
 
   if (user.status === "SUSPENDED") {
