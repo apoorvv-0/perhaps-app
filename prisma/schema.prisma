@@ -1,0 +1,324 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum GlobalRole {
+  USER
+  SUPER_ADMIN
+}
+
+enum EventRoleType {
+  ADMIN
+  CASHIER
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum EventPhase {
+  DRAFT
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSED
+  CHOOSING_OPEN
+  CHOOSING_CLOSED
+  MATCHING
+  RESULTS_OPEN
+  CLOSED
+  ARCHIVED
+}
+
+enum CouponStatus {
+  ISSUED
+  REDEEMED
+  VOIDED
+}
+
+// ─────────────────────────────────────────────
+// CORE IDENTITY (Global Roviara Account)
+// ─────────────────────────────────────────────
+
+model User {
+  id          String     @id @default(uuid())
+  googleId    String     @unique
+  phoneNumber String     @unique
+  globalRole  GlobalRole @default(USER)
+  status      UserStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  profile           Profile?
+  otpRequests       OtpRequest[]
+  pickerChoices     Choice[]           @relation("PickerChoices")
+  pickedChoices     Choice[]           @relation("PickedChoices")
+  matchesAsUser1    Match[]            @relation("MatchUser1")
+  matchesAsUser2    Match[]            @relation("MatchUser2")
+  couponsIssued     Coupon[]           @relation("CashierCoupons")
+  auditLogsAsAdmin  AuditLog[]         @relation("AdminAuditLogs")
+  matchingExecs     MatchingExecution[]
+  leaderboardEntries LeaderboardEntry[]
+  eventRegistrations EventRegistration[]
+  eventRoles         EventRole[]
+
+  @@index([status])
+}
+
+model Profile {
+  userId          String   @id
+  user            User     @relation(fields: [userId], references: [id])
+  firstName       String
+  lastName        String
+  instagramHandle String
+  gender          Gender
+  college         String   // e.g. "KEM Mumbai"
+  batch           String
+  signupTime      DateTime @default(now())
+  leaderboardOptIn Boolean @default(true)
+  ageAttestation  Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([gender])
+  @@index([college])
+  @@index([batch])
+}
+
+// ─────────────────────────────────────────────
+// OTP RATE LIMITING
+// ─────────────────────────────────────────────
+
+model OtpRequest {
+  id          String   @id @default(uuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  phoneNumber String
+  otpHash     String?
+  sentAt      DateTime @default(now())
+  expiresAt   DateTime
+  verified    Boolean  @default(false)
+  attempts    Int      @default(0)
+
+  @@index([phoneNumber, sentAt])
+}
+
+// ─────────────────────────────────────────────
+// EVENT & MARKETPLACE
+// ─────────────────────────────────────────────
+
+model Event {
+  id                   String     @id @default(uuid())
+  name                 String
+  slug                 String     @unique
+  targetCollege        String     // e.g. "KEM Mumbai" - only students from this college can join
+  status               EventPhase @default(DRAFT)
+  registrationEndsAt   DateTime?
+  choosingEndsAt       DateTime?
+  resultsDurationHours Int        @default(72)
+  resultsStartAt       DateTime?
+  resultsEndAt         DateTime?
+  minimumParticipants  Int        @default(200)
+  minimumPerGender     Int        @default(70)
+  cancelledAt          DateTime?
+  cancelReason         String?
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  colleges String @default("[]") // Deprecated: replaced by targetCollege, keeping for backwards compat logic temporarily
+  batches  String @default("[]") // Allowed batches JSON
+
+  choices              Choice[]
+  matches              Match[]
+  matchingExecutions   MatchingExecution[]
+  leaderboardEntries   LeaderboardEntry[]
+  phaseOverrides       PhaseOverride[]
+  registrations        EventRegistration[]
+  eventRoles           EventRole[]
+
+  @@index([status])
+  @@index([slug])
+}
+
+// Assigns Admin/Cashier roles to a specific event
+model EventRole {
+  id        String        @id @default(uuid())
+  eventId   String
+  event     Event         @relation(fields: [eventId], references: [id])
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  role      EventRoleType
+  createdAt DateTime      @default(now())
+
+  @@unique([eventId, userId, role])
+  @@index([userId])
+}
+
+// Links a user to an event (registration)
+model EventRegistration {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+}
+
+// Audit trail for phase overrides
+model PhaseOverride {
+  id          String   @id @default(uuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id])
+  adminId     String
+  fromPhase   EventPhase
+  toPhase     EventPhase
+  reason      String
+  timestamp   DateTime @default(now())
+
+  @@index([eventId])
+}
+
+// ─────────────────────────────────────────────
+// CHOICES
+// ─────────────────────────────────────────────
+
+model Choice {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id])
+  pickerId  String
+  picker    User     @relation("PickerChoices", fields: [pickerId], references: [id])
+  pickedId  String
+  picked    User     @relation("PickedChoices", fields: [pickedId], references: [id])
+  rank      Int      // 1 to 12; 1 = most wanted
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, pickerId, pickedId])
+  @@unique([eventId, pickerId, rank])
+  @@index([eventId, pickerId])
+  @@index([eventId, pickedId])
+}
+
+// ─────────────────────────────────────────────
+// MATCHING
+// ─────────────────────────────────────────────
+
+model MatchingExecution {
+  id             String   @id @default(uuid())
+  eventId        String
+  event          Event    @relation(fields: [eventId], references: [id])
+  version        Int
+  executedById   String
+  executedBy     User     @relation(fields: [executedById], references: [id])
+  matchedCount   Int
+  unmatchedCount Int
+  totalPairs     Int
+  isDryRun       Boolean  @default(false)
+  timestamp      DateTime @default(now())
+
+  @@unique([eventId, version])
+  @@index([eventId])
+}
+
+model Match {
+  id            String   @id @default(uuid())
+  eventId       String
+  event         Event    @relation(fields: [eventId], references: [id])
+  user1Id       String   // Canonically lower UUID
+  user1         User     @relation("MatchUser1", fields: [user1Id], references: [id])
+  user2Id       String
+  user2         User     @relation("MatchUser2", fields: [user2Id], references: [id])
+  matchStrength Int      // rank(A→B) + rank(B→A); lower = stronger
+  createdAt     DateTime @default(now())
+  revealed1     Boolean  @default(false) // user1 has revealed (paid)
+  revealed2     Boolean  @default(false) // user2 has revealed (paid)
+
+  @@unique([eventId, user1Id, user2Id])
+  @@index([eventId])
+  @@index([eventId, user1Id])
+  @@index([eventId, user2Id])
+}
+
+// ─────────────────────────────────────────────
+// LEADERBOARD
+// ─────────────────────────────────────────────
+
+model LeaderboardEntry {
+  id          String   @id @default(uuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  gender      Gender
+  college     String
+  batch       String
+  pickerCount Int      // distinct opted-in pickers
+  rank        Int      // 1, 2, or 3 within slice
+  slice       String   // "overall", "college:AIIMS Delhi", "batch:2022"
+  computedAt  DateTime @default(now())
+
+  @@unique([eventId, userId, slice])
+  @@index([eventId, slice, gender, rank])
+}
+
+// ─────────────────────────────────────────────
+// COUPON SYSTEM
+// ─────────────────────────────────────────────
+
+model Coupon {
+  id         String       @id // 8-char alphanumeric code (cryptographically random)
+  eventId    String?      // Which event this coupon was issued for
+  faceValue  Int          // in paise (₹99 = 9900)
+  status     CouponStatus @default(ISSUED)
+  buyerPhone String
+  cashierId  String
+  cashier    User         @relation("CashierCoupons", fields: [cashierId], references: [id])
+  issuedAt   DateTime     @default(now())
+  redeemedAt DateTime?
+  redeemedBy String?      // userId who redeemed
+  voidedAt   DateTime?
+  voidReason String?
+
+  @@index([eventId])
+  @@index([cashierId])
+  @@index([buyerPhone])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────
+// AUDIT LOG
+// ─────────────────────────────────────────────
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  adminId      String
+  admin        User     @relation("AdminAuditLogs", fields: [adminId], references: [id])
+  action       String   // e.g. "VIEW_CHOICES", "COMMIT_MATCHING", "PUBLISH_RESULTS"
+  targetUserId String?  // user being acted upon (if applicable)
+  eventId      String?
+  reason       String?
+  metadata     Json?    // extra structured context
+  timestamp    DateTime @default(now())
+
+  @@index([adminId])
+  @@index([action])
+  @@index([targetUserId])
+  @@index([timestamp])
+}

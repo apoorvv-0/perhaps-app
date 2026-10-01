@@ -1,0 +1,131 @@
+=== PARTICIPANTS ===
+UserID,Name,Gender,College,Batch,Instagram,Choices Made,Times Picked
+54e946c3-921e-4a6c-9c88-638b89656d23,Boy 1,MALE,KEM Hospital,2022,@bot_1,1,2
+6c88033c-930f-4961-97c2-1d65c22af2cd,Boy 2,MALE,KEM Hospital,2022,@bot_2,2,4
+d877031d-850d-441c-880f-a98d7acacd57,Boy 3,MALE,KEM Hospital,2022,@bot_3,1,5
+13ab80d9-3f41-443e-838f-f3c62cb00b8c,Boy 4,MALE,KEM Hospital,2022,@bot_4,3,3
+6dbe0ed7-0039-4055-8fd9-86fadf12aa06,Boy 5,MALE,KEM Hospital,2022,@bot_5,2,4
+93212aa2-49ef-4aaa-ad0f-b5a3025768b0,Boy 6,MALE,KEM Hospital,2022,@bot_6,5,4
+6650fe38-2145-41e5-9385-9795750005d8,Boy 7,MALE,KEM Hospital,2022,@bot_7,5,0
+669ae059-0547-4705-b062-f5d3b415b447,Boy 8,MALE,KEM Hospital,2022,@bot_8,5,3
+5a7a354b-8bed-4e0f-8eeb-0f057335cd59,Boy 9,MALE,KEM Hospital,2022,@bot_9,5,2
+b0aa0489-68a3-4b93-b393-03da7c930b19,Boy 10,MALE,KEM Hospital,2022,@bot_10,5,3
+e96b17c8-d093-4470-b3dd-6930e5a84984,Girl 11,FEMALE,KEM Hospital,2022,@bot_11,1,6
+d0fc8eed-ef30-4808-a839-20af5a964cdd,Girl 12,FEMALE,KEM Hospital,2022,@bot_12,2,5
+8c09cb2f-dc83-40fe-bcb2-c92c181a9466,Girl 13,FEMALE,KEM Hospital,2022,@bot_13,1,5
+612dc88c-7353-412b-bd62-55445b8c8c2a,Girl 14,FEMALE,KEM Hospital,2022,@bot_14,3,2
+1537cbaf-7e39-400d-a190-45b0162829a0,Girl 15,FEMALE,KEM Hospital,2022,@bot_15,1,3
+44d79957-ae62-435a-8a73-41755c134b22,Girl 16,FEMALE,KEM Hospital,2022,@bot_16,2,5
+c78ea2cd-0b00-4699-814a-a6b463e30a97,Girl 17,FEMALE,KEM Hospital,2022,@bot_17,5,1
+033dcf67-284a-4a0e-88c0-d6998b55187c,Girl 18,FEMALE,KEM Hospital,2022,@bot_18,5,2
+17df66a4-4d3f-4f14-bf41-056cdc93229a,Girl 19,FEMALE,KEM Hospital,2022,@bot_19,5,3
+2e8b887f-31ce-4ede-91ef-24f03abfc66c,Girl 20,FEMALE,KEM Hospital,2022,@bot_20,5,2
+12c06f45-1c65-4352-9682-cf0f5be919a3,Maleapoorv W,MALE,Seth GS Medical College,2024,@testuser_student_1,0,0
+
+=== ALL CHOICES (Who Picked Whom) ===
+Picker Name,Picker Gender,Rank,Picked Name,Picked Gender,Is Mutual?
+Girl 18,FEMALE,1,Boy 3,MALE,no
+Girl 18,FEMALE,2,Boy 8,MALE,no
+Girl 18,FEMALE,3,Boy 2,MALE,no
+Girl 18,FEMALE,4,Boy 6,MALE,YES ✓
+Girl 18,FEMALE,5,Boy 10,MALE,no
+Boy 4,MALE,1,Girl 11,FEMALE,no
+Boy 4,MALE,2,Girl 12,FEMALE,no
+Boy 4,MALE,3,Girl 14,FEMALE,YES ✓
+Girl 15,FEMALE,1,Boy 5,MALE,YES ✓
+Girl 19,FEMALE,1,Boy 3,MALE,no
+Girl 19,FEMALE,2,Boy 4,MALE,no
+Girl 19,FEMALE,3,Boy 9,MALE,YES ✓
+Girl 19,FEMALE,4,Boy 10,MALE,no
+Girl 19,FEMALE,5,Boy 6,MALE,no
+Girl 20,FEMALE,1,Boy 5,MALE,no
+Girl 20,FEMALE,2,Boy 4,MALE,no
+Girl 20,FEMALE,3,Boy 3,MALE,no
+Girl 20,FEMALE,4,Boy 8,MALE,YES ✓
+Girl 20,FEMALE,5,Boy 6,MALE,no
+Girl 16,FEMALE,1,Boy 6,MALE,YES ✓
+Girl 16,FEMALE,2,Boy 5,MALE,YES ✓
+Boy 1,MALE,1,Girl 11,FEMALE,YES ✓
+Boy 9,MALE,1,Girl 18,FEMALE,no
+Boy 9,MALE,2,Girl 11,FEMALE,no
+Boy 9,MALE,3,Girl 19,FEMALE,YES ✓
+Boy 9,MALE,4,Girl 12,FEMALE,no
+Boy 9,MALE,5,Girl 13,FEMALE,no
+Girl 14,FEMALE,1,Boy 1,MALE,no
+Girl 14,FEMALE,2,Boy 2,MALE,no
+Girl 14,FEMALE,3,Boy 4,MALE,YES ✓
+Boy 7,MALE,1,Girl 15,FEMALE,no
+Boy 7,MALE,2,Girl 14,FEMALE,no
+Boy 7,MALE,3,Girl 19,FEMALE,no
+Boy 7,MALE,4,Girl 16,FEMALE,no
+Boy 7,MALE,5,Girl 13,FEMALE,no
+Boy 8,MALE,1,Girl 13,FEMALE,no
+Boy 8,MALE,2,Girl 16,FEMALE,no
+Boy 8,MALE,3,Girl 19,FEMALE,no
+Boy 8,MALE,4,Girl 11,FEMALE,no
+Boy 8,MALE,5,Girl 20,FEMALE,YES ✓
+Boy 2,MALE,1,Girl 13,FEMALE,no
+Boy 2,MALE,2,Girl 12,FEMALE,YES ✓
+Boy 5,MALE,1,Girl 15,FEMALE,YES ✓
+Boy 5,MALE,2,Girl 16,FEMALE,YES ✓
+Girl 13,FEMALE,1,Boy 3,MALE,YES ✓
+Boy 6,MALE,1,Girl 15,FEMALE,no
+Boy 6,MALE,2,Girl 18,FEMALE,YES ✓
+Boy 6,MALE,3,Girl 11,FEMALE,no
+Boy 6,MALE,4,Girl 16,FEMALE,YES ✓
+Boy 6,MALE,5,Girl 12,FEMALE,no
+Boy 10,MALE,1,Girl 17,FEMALE,YES ✓
+Boy 10,MALE,2,Girl 11,FEMALE,no
+Boy 10,MALE,3,Girl 12,FEMALE,no
+Boy 10,MALE,4,Girl 20,FEMALE,no
+Boy 10,MALE,5,Girl 16,FEMALE,no
+Girl 17,FEMALE,1,Boy 8,MALE,no
+Girl 17,FEMALE,2,Boy 10,MALE,YES ✓
+Girl 17,FEMALE,3,Boy 2,MALE,no
+Girl 17,FEMALE,4,Boy 5,MALE,no
+Girl 17,FEMALE,5,Boy 9,MALE,no
+Girl 12,FEMALE,1,Boy 3,MALE,no
+Girl 12,FEMALE,2,Boy 2,MALE,YES ✓
+Boy 3,MALE,1,Girl 13,FEMALE,YES ✓
+Girl 11,FEMALE,1,Boy 1,MALE,YES ✓
+
+=== ALL MUTUAL PAIRS (before greedy matching) ===
+Person A,Gender A,Person B,Gender B,Rank A→B,Rank B→A,Strength,Assigned Match?
+Girl 15,FEMALE,Boy 5,MALE,1,1,2,✗ Lost to greedy
+Boy 1,MALE,Girl 11,FEMALE,1,1,2,✗ Lost to greedy
+Girl 13,FEMALE,Boy 3,MALE,1,1,2,✗ Lost to greedy
+Boy 10,MALE,Girl 17,FEMALE,1,2,3,✗ Lost to greedy
+Girl 16,FEMALE,Boy 5,MALE,2,2,4,✗ Lost to greedy
+Boy 2,MALE,Girl 12,FEMALE,2,2,4,✗ Lost to greedy
+Girl 16,FEMALE,Boy 6,MALE,1,4,5,✗ Lost to greedy
+Girl 18,FEMALE,Boy 6,MALE,4,2,6,✗ Lost to greedy
+Boy 4,MALE,Girl 14,FEMALE,3,3,6,✗ Lost to greedy
+Girl 19,FEMALE,Boy 9,MALE,3,3,6,✗ Lost to greedy
+Girl 20,FEMALE,Boy 8,MALE,4,5,9,✗ Lost to greedy
+
+=== FINAL MATCHES (Algorithm Output) ===
+Rank,Person 1,Gender 1,Instagram 1,Person 2,Gender 2,Instagram 2,P1 Ranked P2 At,P2 Ranked P1 At,Match Strength
+
+=== UNMATCHED PARTICIPANTS ===
+Name,Gender,Instagram,Choices Made,Times Picked,Had Mutual Pairs?
+Boy 1,MALE,@bot_1,1,2,Yes (lost to greedy)
+Boy 2,MALE,@bot_2,2,4,Yes (lost to greedy)
+Boy 3,MALE,@bot_3,1,5,Yes (lost to greedy)
+Boy 4,MALE,@bot_4,3,3,Yes (lost to greedy)
+Boy 5,MALE,@bot_5,2,4,Yes (lost to greedy)
+Boy 6,MALE,@bot_6,5,4,Yes (lost to greedy)
+Boy 7,MALE,@bot_7,5,0,No
+Boy 8,MALE,@bot_8,5,3,Yes (lost to greedy)
+Boy 9,MALE,@bot_9,5,2,Yes (lost to greedy)
+Boy 10,MALE,@bot_10,5,3,Yes (lost to greedy)
+Girl 11,FEMALE,@bot_11,1,6,Yes (lost to greedy)
+Girl 12,FEMALE,@bot_12,2,5,Yes (lost to greedy)
+Girl 13,FEMALE,@bot_13,1,5,Yes (lost to greedy)
+Girl 14,FEMALE,@bot_14,3,2,Yes (lost to greedy)
+Girl 15,FEMALE,@bot_15,1,3,Yes (lost to greedy)
+Girl 16,FEMALE,@bot_16,2,5,Yes (lost to greedy)
+Girl 17,FEMALE,@bot_17,5,1,Yes (lost to greedy)
+Girl 18,FEMALE,@bot_18,5,2,Yes (lost to greedy)
+Girl 19,FEMALE,@bot_19,5,3,Yes (lost to greedy)
+Girl 20,FEMALE,@bot_20,5,2,Yes (lost to greedy)
+Maleapoorv W,MALE,@testuser_student_1,0,0,No
