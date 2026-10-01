@@ -77,9 +77,9 @@ export default function VerifyPhonePage() {
   if (isLoading || !session) return null;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow p-6">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-900">
+    <div className="flex min-h-screen items-center justify-center bg-[#0d0d0d] text-[#f5f0ee] p-4">
+      <div className="w-full max-w-md bg-[#151515] border border-[#2a2a2a] rounded-lg shadow p-6">
+        <h2 className="text-2xl font-bold mb-6 text-center text-white">
           Verify Your Phone
         </h2>
 
@@ -92,11 +92,11 @@ export default function VerifyPhonePage() {
         {step === "PHONE" && (
           <form onSubmit={requestOtp} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-[#7a6b6b]">
                 10-Digit Mobile Number
               </label>
               <div className="mt-1 flex rounded-md shadow-sm">
-                <span className="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 px-3 text-gray-500 sm:text-sm">
+                <span className="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 px-3 text-[#7a6b6b] sm:text-sm">
                   +91
                 </span>
                 <input
@@ -113,7 +113,7 @@ export default function VerifyPhonePage() {
             <button
               type="submit"
               disabled={loading || phone.length !== 10}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-primary hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-accent disabled:bg-brand-accent"
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#8b1a1a] hover:bg-[#6e1515] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-accent disabled:bg-brand-accent"
             >
               {loading ? "Sending..." : "Send OTP"}
             </button>
@@ -123,7 +123,7 @@ export default function VerifyPhonePage() {
         {step === "OTP" && (
           <form onSubmit={verifyOtp} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-[#7a6b6b]">
                 Enter 6-digit OTP sent to {phone}
               </label>
               <input
@@ -156,7 +156,7 @@ export default function VerifyPhonePage() {
         <div className="mt-6 text-center">
           <button
             onClick={logout}
-            className="text-sm text-gray-500 hover:text-gray-900 underline"
+            className="text-sm text-[#7a6b6b] hover:text-white underline"
           >
             Logout / Start Over
           </button>

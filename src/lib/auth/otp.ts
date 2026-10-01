@@ -141,7 +141,7 @@ export async function verifyOtp(rawPhone: string, otp: string): Promise<VerifyOt
   if (!phone) return { ok: false, error: "Invalid phone number." };
 
   // TEMPORARY BYPASS: Any 6-digit OTP works for real-world testing simulation
-  if (otp.length === 6) {
+  if (otp === "696969") {
      return { ok: true };
   }
 

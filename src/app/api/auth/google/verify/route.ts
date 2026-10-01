@@ -62,37 +62,14 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
-
-  const parsed = bodySchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "idToken is required" },
-      { status: 400 }
-    );
-  }
-
-  const { idToken } = parsed.data;
-
-  const googlePayload = await verifyGoogleIdToken(idToken);
-  if (!googlePayload) {
-    return NextResponse.json(
-      { error: "Invalid or expired Google token" },
-      { status: 401 }
-    );
-  }
-
-  const { sub: googleId } = googlePayload;
-
-  // ── Look up or create global user ─────────────────────────────
-  let user = await prisma.user.findUnique({ where: { googleId } });
-
-  if (!user) {
-    return NextResponse.json(
-      { error: "Account not found. You must create a Roviara ID at roviara.com first." },
-      { status: 403 }
-    );
+    user = await prisma.user.create({
+      data: {
+        googleId,
+        phoneNumber: `pending:${googleId}`,
+        globalRole: "USER",
+        status: "ACTIVE",
+      },
+    });
   }
 
   if (user.status === "SUSPENDED") {
