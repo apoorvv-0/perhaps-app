@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   }
 
   const event = await getActiveEvent();
-  if (!event || event.status !== "CHOOSING_OPEN") {
+  if (!event || event.status !== "CHOOSING_OPEN" && event.status !== "CHOOSING_CLOSED") {
     return NextResponse.json(
       { error: "Choosing is not currently open." },
       { status: 403 }

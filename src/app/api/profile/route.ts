@@ -4,6 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/auth/session-core";
 import { prisma } from "@/lib/db/prisma";
 import { getSession, setSessionCookie } from "@/lib/auth/session";
 import { getActiveEvent } from "@/lib/event-service";

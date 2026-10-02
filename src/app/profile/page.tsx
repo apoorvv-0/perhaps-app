@@ -65,7 +65,7 @@ export default function ProfileSetupPage() {
         router.push("/");
       } else if (!session.phoneVerified) {
         router.push("/verify-phone");
-      } else if (session.profileComplete && !initialFetchDone) {
+      } else if (session.profileComplete && !initialFetchDoneRef.current) {
         fetch("/api/profile")
           .then(r => r.json())
           .then(data => {
@@ -80,12 +80,12 @@ export default function ProfileSetupPage() {
             }
             initialFetchDoneRef.current = true;
           })
-          .catch(() => setInitialFetchDone(true));
+          .catch(() => { initialFetchDoneRef.current = true; });
       } else if (!session.profileComplete) {
         initialFetchDoneRef.current = true;
       }
     }
-  }, [session, isLoading, router, initialFetchDone]);
+  }, [session, isLoading, router, initialFetchDoneRef.current]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,7 +129,7 @@ export default function ProfileSetupPage() {
     }
   };
 
-  if (isLoading || !session || !initialFetchDone) return null;
+  if (isLoading || !session || !initialFetchDoneRef.current) return null;
 
   return (
     <div style={{ minHeight: "100vh", background: '#0d0d0d', paddingBottom: isEditMode ? 80 : 0 }}>
