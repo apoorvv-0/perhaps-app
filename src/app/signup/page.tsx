@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
@@ -11,6 +12,7 @@ export default function SignupPage() {
   const [dataConsent, setDataConsent] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  
   const clientId = (process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "").trim();
 
   useEffect(() => {
@@ -45,42 +47,89 @@ export default function SignupPage() {
     }
   };
 
-  if (isLoading || session) return <div style={{ minHeight: '100vh', background: '#260609' }} />;
+  if (isLoading || session) return <div style={{ minHeight: '100vh', background: '#09090b' }} />;
 
   return (
     <GoogleOAuthProvider clientId={clientId}>
-      <main className="min-h-screen bg-wine text-blush flex flex-col items-center justify-center p-6 font-inter">
-        <div className="fixed inset-0 bg-perhaps-hero pointer-events-none" />
-        <div className="relative max-w-md w-full glass rounded-3xl p-8 shadow-perhaps-soft">
-          <div className="text-center mb-8">
-            <img src="/logo-cropped.png" alt="Perhaps" className="h-12 w-auto rounded-lg mx-auto mb-2 object-cover shadow-perhaps-glow" style={{ mixBlendMode: 'lighten' }} />
-            <p className="text-xs text-taupe uppercase tracking-widest">Create your Roviara ID</p>
+      <main className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col items-center justify-center p-6 font-inter relative">
+        {/* Subtle background glow */}
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-rose-900/10 via-zinc-950/0 to-zinc-950/0" />
+
+        <div className="relative max-w-md w-full bg-zinc-900/40 backdrop-blur-xl rounded-[32px] p-8 sm:p-10 border border-white/5 shadow-2xl animate-fade-up">
+          
+          {/* Header */}
+          <div className="text-center mb-10">
+            <img 
+              src="/logo.png" 
+              alt="Perhaps" 
+              className="h-10 w-auto mx-auto mb-6 opacity-90" 
+              style={{ filter: "invert(1) drop-shadow(0 0 10px rgba(159,18,57,0.3))" }} 
+            />
+            <h1 className="font-playfair text-2xl mb-2">Create your Roviara ID</h1>
+            <p className="text-sm text-zinc-400">One secure identity for all Perhaps events.</p>
           </div>
-          <div className="space-y-4 mb-8 bg-charcoal/40 p-4 rounded-2xl border border-rose-gold/10">
-            <h2 className="text-xs font-semibold text-taupe-light uppercase tracking-wide mb-3">DPDP Compliance &amp; Consent</h2>
-            <label className="flex items-start gap-3 cursor-pointer group">
-              <input type="checkbox" checked={ageConsent} onChange={(e) => setAgeConsent(e.target.checked)} className="mt-1 w-4 h-4 rounded border-taupe/40 bg-charcoal/60" />
-              <span className="text-sm text-blush/80 group-hover:text-blush transition leading-relaxed">I declare that I am 18 years of age or older.</span>
+
+          {/* Consent section */}
+          <div className="space-y-5 mb-10 bg-zinc-950/50 p-5 rounded-2xl border border-white/5">
+            <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">DPDP Consent</h2>
+            
+            <label className="flex items-start gap-4 cursor-pointer group">
+              <input 
+                type="checkbox" 
+                checked={ageConsent} 
+                onChange={(e) => setAgeConsent(e.target.checked)} 
+                className="mt-1 w-5 h-5 rounded border-zinc-700 bg-zinc-900 accent-rose-700" 
+              />
+              <span className="text-sm text-zinc-400 group-hover:text-zinc-200 transition leading-relaxed">
+                I declare that I am 18 years of age or older.
+              </span>
             </label>
-            <label className="flex items-start gap-3 cursor-pointer group">
-              <input type="checkbox" checked={dataConsent} onChange={(e) => setDataConsent(e.target.checked)} className="mt-1 w-4 h-4 rounded border-taupe/40 bg-charcoal/60" />
-              <span className="text-sm text-blush/80 group-hover:text-blush transition leading-relaxed">I consent to the collection and processing of my personal data (Name, Email, Google ID) by Roviara for identity verification, strictly under the Digital Personal Data Protection Act.</span>
+            
+            <label className="flex items-start gap-4 cursor-pointer group">
+              <input 
+                type="checkbox" 
+                checked={dataConsent} 
+                onChange={(e) => setDataConsent(e.target.checked)} 
+                className="mt-1 w-5 h-5 rounded border-zinc-700 bg-zinc-900 accent-rose-700" 
+              />
+              <span className="text-sm text-zinc-400 group-hover:text-zinc-200 transition leading-relaxed">
+                I consent to the collection and processing of my personal data (Name, Email, Google ID) strictly under the Digital Personal Data Protection Act.
+              </span>
             </label>
           </div>
+
+          {/* Actions */}
           <div className="flex flex-col items-center gap-4">
-            {error && <p className="text-sm text-rose-gold bg-burgundy/20 p-3 rounded-2xl border border-burgundy/30 w-full text-center">{error}</p>}
-            {loading && <p className="text-sm text-taupe">Signing you in...</p>}
-            <div className={`transition-all duration-300 ${ageConsent && dataConsent ? 'opacity-100' : 'opacity-40 grayscale pointer-events-none'}`}>
-              <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => setError("Google Login Failed")} useOneTap={false} />
+            {error && (
+              <div className="text-sm text-rose-400 bg-rose-950/30 px-4 py-3 rounded-xl border border-rose-900/50 w-full text-center">
+                {error}
+              </div>
+            )}
+            
+            {loading && <p className="text-sm text-zinc-500 animate-pulse">Authenticating...</p>}
+            
+            <div className={`transition-all duration-300 w-full flex justify-center ${ageConsent && dataConsent ? 'opacity-100' : 'opacity-40 grayscale pointer-events-none'}`}>
+              <GoogleLogin 
+                onSuccess={handleGoogleSuccess} 
+                onError={() => setError("Google Login Failed")} 
+                useOneTap={false} 
+                theme="filled_black"
+                shape="pill"
+              />
             </div>
-            {!(ageConsent && dataConsent) && <p className="text-xs text-taupe text-center">Accept both terms above to continue.</p>}
+
+            {!(ageConsent && dataConsent) && (
+              <p className="text-xs text-zinc-500 text-center mt-2">
+                Accept both terms above to unlock login.
+              </p>
+            )}
           </div>
-          <div className="mt-6 text-center">
-            <a href="/" className="text-xs text-taupe hover:text-rose-gold transition">← Back to Perhaps</a>
+
+          <div className="mt-8 text-center">
+            <a href="/" className="text-xs text-zinc-500 hover:text-zinc-300 transition">← Back to home</a>
           </div>
         </div>
       </main>
     </GoogleOAuthProvider>
   );
 }
-
