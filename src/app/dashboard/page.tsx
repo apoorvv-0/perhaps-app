@@ -81,8 +81,30 @@ export default function DashboardPage() {
         
         {/* Phase Banner */}
         <div style={{ marginTop: '24px', background: "rgba(20, 20, 20, 0.4)", backdropFilter: "blur(10px)", borderLeft: '4px solid #8b1a1a', padding: '16px 20px', borderRadius: '4px' }}>
-          <p style={{ fontSize: '12px', color: '#7a6b6b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Current Phase</p>
-          <p style={{ fontSize: '16px', color: '#f5f0ee', fontWeight: 500 }}>{displayPhase}</p>
+          {phase === 'REGISTRATION_OPEN' ? (
+            <>
+              <p style={{ fontSize: '12px', color: '#7a6b6b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Status</p>
+              <p style={{ fontSize: '16px', color: '#f5f0ee', fontWeight: 500 }}>You are registered.</p>
+              <p style={{ fontSize: '13px', color: '#c9a0a0', marginTop: '4px' }}>Choosing your maybes begins soon.</p>
+            </>
+          ) : phase === 'CHOOSING_OPEN' ? (
+            <>
+              <p style={{ fontSize: '12px', color: '#7a6b6b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Status</p>
+              <p style={{ fontSize: '16px', color: '#f5f0ee', fontWeight: 500 }}>Choosing is live!</p>
+              <p style={{ fontSize: '13px', color: '#c9a0a0', marginTop: '4px' }}>Go to the Directory to rank your matches.</p>
+            </>
+          ) : phase === 'CHOOSING_CLOSED' || phase === 'MATCHING' ? (
+             <>
+              <p style={{ fontSize: '12px', color: '#7a6b6b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Status</p>
+              <p style={{ fontSize: '16px', color: '#f5f0ee', fontWeight: 500 }}>Choices Locked.</p>
+              <p style={{ fontSize: '13px', color: '#c9a0a0', marginTop: '4px' }}>Matches are being calculated...</p>
+            </>
+          ) : (
+            <>
+              <p style={{ fontSize: '12px', color: '#7a6b6b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Current Phase</p>
+              <p style={{ fontSize: '16px', color: '#f5f0ee', fontWeight: 500 }}>{displayPhase}</p>
+            </>
+          )}
         </div>
       </div>
 

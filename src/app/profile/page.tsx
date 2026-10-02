@@ -5,17 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import BottomTabBar from "@/components/BottomTabBar";
 
-const COLLEGES = [
-  "Seth GS Medical College",
-  "Topiwala National Medical College",
-  "Lokmanya Tilak Municipal Medical College",
-  "Grant Medical College",
-  "HBT Medical College",
-  "KEM Hospital",
-  "Sion Hospital",
-  "Nair Hospital",
-  "Other"
-];
+const COLLEGES = ['Dr. Balasaheb Vikhe Patil Rural Medical College, Loni'];
 
 const BATCHES = [
   "2020", "2021", "2022", "2023", "2024", "Intern", "Other"
@@ -372,7 +362,7 @@ export default function ProfileSetupPage() {
                   transition: "background 0.2s",
                 }}
               >
-                {loading ? "Saving..." : isEditMode ? "Save Changes" : "Complete Profile"}
+                {loading ? "Saving..." : isEditMode ? "Save Changes" : "Register for Perhaps"}
               </button>
             </div>
           </form>
