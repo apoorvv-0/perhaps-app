@@ -53,7 +53,7 @@ export default function SignupPage() {
         <div className="fixed inset-0 bg-perhaps-hero pointer-events-none" />
         <div className="relative max-w-md w-full glass rounded-3xl p-8 shadow-perhaps-soft">
           <div className="text-center mb-8">
-            <img src="/logo.jpg" alt="Perhaps" className="h-12 w-auto rounded-lg mx-auto mb-2 object-cover shadow-perhaps-glow" style={{ mixBlendMode: 'lighten' }} />
+            <img src="/logo-cropped.png" alt="Perhaps" className="h-12 w-auto rounded-lg mx-auto mb-2 object-cover shadow-perhaps-glow" style={{ mixBlendMode: 'lighten' }} />
             <p className="text-xs text-taupe uppercase tracking-widest">Create your Roviara ID</p>
           </div>
           <div className="space-y-4 mb-8 bg-charcoal/40 p-4 rounded-2xl border border-rose-gold/10">
@@ -83,3 +83,4 @@ export default function SignupPage() {
     </GoogleOAuthProvider>
   );
 }
+

@@ -255,7 +255,7 @@ export default function PerhapsLanding() {
         <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
           {/* Logo */}
           <a href="/" className="flex items-center gap-0">
-            <img src="/logo.jpg" alt="Perhaps" className="h-8 w-auto rounded object-cover" style={{ mixBlendMode: 'lighten' }} />
+            <img src="/logo-cropped.png" alt="Perhaps" className="h-8 w-auto rounded object-cover" style={{ mixBlendMode: 'lighten' }} />
           </a>
 
           {/* Desktop nav links */}
@@ -316,7 +316,7 @@ export default function PerhapsLanding() {
         </div>
 
         {/* Main heading */}
-        <img src="/logo.jpg" alt="Perhaps" className="w-64 md:w-80 h-auto rounded-xl mx-auto mb-6 object-cover shadow-perhaps-glow animate-fade-up" style={{ mixBlendMode: 'lighten' }} />
+        <img src="/logo-cropped.png" alt="Perhaps" className="w-64 md:w-80 h-auto rounded-xl mx-auto mb-6 object-cover shadow-perhaps-glow animate-fade-up" style={{ mixBlendMode: 'lighten' }} />
         <WaveUnderline className="w-48 mx-auto mb-6 animate-fade-in" />
 
         <p className="text-xl sm:text-2xl text-blush/90 font-playfair italic mb-4 animate-fade-up" style={{ animationDelay: "0.1s" }}>
@@ -544,7 +544,7 @@ export default function PerhapsLanding() {
       {/* ── FOOTER ───────────────────────────────────────────── */}
       <footer className="px-5 py-10 border-t border-rose-gold/8">
         <div className="max-w-md mx-auto flex flex-col items-center gap-4 text-center">
-          <img src="/logo.jpg" alt="Perhaps" className="h-10 w-auto rounded object-cover mx-auto" style={{ mixBlendMode: 'lighten' }} />
+          <img src="/logo-cropped.png" alt="Perhaps" className="h-10 w-auto rounded object-cover mx-auto" style={{ mixBlendMode: 'lighten' }} />
           <WaveUnderline className="w-24" />
           <p className="text-xs text-taupe max-w-xs leading-relaxed">
             A product by Roviara · Built for college India · Premium by design
@@ -575,3 +575,4 @@ export default function PerhapsLanding() {
     </div>
   );
 }
+

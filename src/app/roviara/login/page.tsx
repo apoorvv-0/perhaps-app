@@ -48,7 +48,7 @@ export default function RoviaraLogin() {
       <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', background: '#050505' }}>
         <div className="glass-card fade-in" style={{ maxWidth: '400px', width: '100%', textAlign: 'center', padding: '40px 32px' }}>
           
-          <img src="/logo.jpg" alt="Perhaps" style={{ height: '40px', width: 'auto', borderRadius: '4px', objectFit: 'cover', mixBlendMode: 'lighten', margin: '0 auto 8px auto' }} />
+          <img src="/logo-cropped.png" alt="Perhaps" style={{ height: '40px', width: 'auto', borderRadius: '4px', objectFit: 'cover', mixBlendMode: 'lighten', margin: '0 auto 8px auto' }} />
           <p style={{ fontSize: '13px', color: '#7a6b6b', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '40px' }}>
             Staff Command Center
           </p>
@@ -76,3 +76,4 @@ export default function RoviaraLogin() {
     </GoogleOAuthProvider>
   );
 }
+
