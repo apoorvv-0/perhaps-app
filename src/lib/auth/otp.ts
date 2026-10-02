@@ -118,7 +118,7 @@ export async function sendOtp(
   });
 
   // ── Send via provider ────────────────────
-  const result = { success: true }; // MOCK SMS PROVIDER
+  const result: { success: boolean; error?: string } = { success: true }; // MOCK SMS PROVIDER
   if (!result.success) {
     // Rollback the DB entry on send failure
     await prisma.otpRequest.delete({ where: { id: otpRecord.id } });
