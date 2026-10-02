@@ -42,10 +42,13 @@ export default function PerhapsLanding() {
           worth the maybe.
         </p>
 
-        {/* Primary CTA button pinned near bottom on mobile, or just below on desktop */}
-        <div className="w-full mt-auto mb-16 animate-fade-up delay-200">
+        {/* Actions pinned near bottom on mobile, or just below on desktop */}
+        <div className="w-full mt-auto mb-16 flex flex-col gap-4 animate-fade-up delay-200">
           <a href="/signup" className="btn-primary block w-full text-center shadow-premium">
-            Get Started
+            Register Now
+          </a>
+          <a href="/login" className="btn-secondary block w-full text-center">
+            Sign In
           </a>
         </div>
       </div>
