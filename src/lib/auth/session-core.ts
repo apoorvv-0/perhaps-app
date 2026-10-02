@@ -47,7 +47,7 @@ export async function verifyToken(
   try {
     const { payload } = await jwtVerify(token, SECRET);
     return payload as unknown as SessionPayload;
-  } catch {
+  } catch (err) { console.error('[DEBUG] verifyToken failed:', err);
     return null;
   }
 }
