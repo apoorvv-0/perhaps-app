@@ -32,7 +32,7 @@ export default function PerhapsLanding() {
             src="/logo.png" 
             alt="Perhaps" 
             className="w-56 h-auto mx-auto object-contain"
-            style={{ filter: "invert(1) drop-shadow(0 4px 20px rgba(90, 13, 20, 0.4))" }}
+            style={{ filter: "drop-shadow(0 4px 20px rgba(90, 13, 20, 0.4))" }}
           />
         </div>
 

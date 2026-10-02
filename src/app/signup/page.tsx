@@ -62,7 +62,7 @@ export default function SignupPage() {
               src="/logo.png" 
               alt="Perhaps" 
               className="h-8 w-auto mx-auto mb-6 opacity-90" 
-              style={{ filter: "invert(1) drop-shadow(0 0 10px rgba(90,13,20,0.4))" }} 
+              style={{ filter: "drop-shadow(0 4px 20px rgba(90, 13, 20, 0.4))" }} 
             />
             <h1 className="font-playfair text-[24px] mb-2 text-brand-blush">Create your Roviara ID</h1>
             <p className="text-sm text-brand-taupe">One secure identity for all Perhaps events.</p>
