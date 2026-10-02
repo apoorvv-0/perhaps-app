@@ -41,14 +41,18 @@ export async function POST(request: NextRequest) {
 
   let user = await prisma.user.findUnique({ where: { googleId } });
   if (!user) {
+    if (!ageConsent || !dataConsent) {
+      return NextResponse.json({ error: "Account not found. Please register first." }, { status: 404 });
+    }
+
     user = await prisma.user.create({
       data: { 
         googleId, 
         phoneNumber: `pending:${googleId}`, 
         globalRole: "USER", 
         status: "ACTIVE",
-        consentGivenAt: ageConsent && dataConsent ? new Date() : null,
-        consentVersion: ageConsent && dataConsent ? "v1.0" : null
+        consentGivenAt: new Date(),
+        consentVersion: "v1.0"
       },
     });
   }
