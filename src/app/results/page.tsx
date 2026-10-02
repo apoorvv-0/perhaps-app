@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -187,7 +187,7 @@ export default function ResultsPage() {
               <p className="text-brand-rose text-sm relative z-10 mb-4">{matchStatus.matchedUser.college} • {matchStatus.matchedUser.batch}</p>
               
               <a 
-                href={https://instagram.com/}
+                href={`https://instagram.com/${matchStatus.matchedUser.instagramHandle.replace('@', '')}`}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-block bg-white/10 hover:bg-white/20 transition-colors backdrop-blur px-6 py-3 rounded-full text-brand-blush font-medium text-sm border border-brand-rose/30 relative z-10"

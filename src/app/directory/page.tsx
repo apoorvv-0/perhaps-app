@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -110,7 +110,7 @@ export default function DirectoryPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        setSuccessMsg(${data.savedCount} choices saved.);
+        setSuccessMsg(`${data.savedCount} choices saved.`);
       } else {
         setError(data.error || "Failed to save choices.");
       }
@@ -149,7 +149,7 @@ export default function DirectoryPage() {
   }
 
   const filteredParticipants = participants.filter(p =>
-    ${p.firstName}  .toLowerCase().includes(search.toLowerCase())
+    `${p.firstName} ${p.lastName} ${p.college}`.toLowerCase().includes(search.toLowerCase())
   );
 
   const pickedParticipants = choices
