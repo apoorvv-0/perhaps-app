@@ -47,7 +47,7 @@ export default function ProfileSetupPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const initialFetchDoneRef = useRef<boolean>(false);
+  const [initialFetchDone, setInitialFetchDone] = useState(false);
 
   useEffect(() => {
     if (!isLoading) {
@@ -55,7 +55,7 @@ export default function ProfileSetupPage() {
         router.push("/");
       } else if (!session.phoneVerified) {
         router.push("/verify-phone");
-      } else if (session.profileComplete && !initialFetchDoneRef.current) {
+      } else if (session.profileComplete && !initialFetchDone) {
         fetch("/api/profile")
           .then(r => r.json())
           .then(data => {
@@ -68,14 +68,14 @@ export default function ProfileSetupPage() {
               setInstagram(data.profile.instagramHandle);
               setIsEditMode(true);
             }
-            initialFetchDoneRef.current = true;
+            setInitialFetchDone(true);
           })
-          .catch(() => { initialFetchDoneRef.current = true; });
+          .catch(() => { setInitialFetchDone(true); });
       } else if (!session.profileComplete) {
-        initialFetchDoneRef.current = true;
+        setInitialFetchDone(true);
       }
     }
-  }, [session, isLoading, router, initialFetchDoneRef.current]);
+  }, [session, isLoading, router, initialFetchDone]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +84,7 @@ export default function ProfileSetupPage() {
 
     let cleanInsta = instagram.trim();
     if (cleanInsta.startsWith("@")) {
-      cleanInsta = cleanInsta.substring(1);
+      cleanInsta = cleanInsta.replace(/^@+/, '');
     }
 
     try {
@@ -119,7 +119,7 @@ export default function ProfileSetupPage() {
     }
   };
 
-  if (isLoading || !session || !initialFetchDoneRef.current) return null;
+  if (isLoading || !session || !initialFetchDone) return null;
 
   return (
     <div style={{ minHeight: "100vh", background: '#0d0d0d', paddingBottom: isEditMode ? 80 : 0 }}>

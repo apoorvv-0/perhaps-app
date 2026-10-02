@@ -139,7 +139,7 @@ export default function DirectoryPage() {
     );
   }
 
-  if (eventPhase && eventPhase !== "CHOOSING_OPEN" && eventPhase !== "CHOOSING_CLOSED") {
+  if (error === "Choosing is not currently open." || (eventPhase && eventPhase !== "CHOOSING_OPEN" && eventPhase !== "CHOOSING_CLOSED")) {
     return (
       <div style={{ minHeight: "100vh", background: "#0d0d0d", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ textAlign: "center", padding: 40 }}>
