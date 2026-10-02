@@ -12,7 +12,8 @@ async function verifyGoogleIdToken(idToken: string): Promise<GoogleTokenPayload 
     const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
     if (!res.ok) return null;
     const payload = (await res.json()) as GoogleTokenPayload;
-    if (payload.aud !== process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) { console.warn("[GoogleAuth] Token audience mismatch"); return null; }
+    const clientId = (process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "").trim();
+    if (!clientId || payload.aud.trim() !== clientId) { console.warn("[GoogleAuth] Token audience mismatch", { aud: payload.aud, clientId }); return null; }
     if (payload.exp < Date.now() / 1000) return null;
     return payload;
   } catch { return null; }
