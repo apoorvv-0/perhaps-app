@@ -1,6 +1,36 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Playfair+Display:ital,wght@0,600;0,700;1,400;1,600;1,700&family=Inter:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
 
+@theme {
+  --color-burgundy: #5A0D14;
+  --color-burgundy-dark: #3d0a0e;
+  --color-burgundy-light: #7a1a22;
+  --color-wine: #260609;
+  --color-wine-dark: #130305;
+  --color-charcoal: #0D0D0D;
+  --color-blush: #F6D7CF;
+  --color-blush-dark: #e8c4ba;
+  --color-blush-light: #faeae6;
+  --color-rose-gold: #EBB4A5;
+  --color-rose-gold-dark: #d99e8f;
+  --color-rose-gold-light: #f5cec3;
+  --color-taupe: #6B5A57;
+  --color-taupe-light: #8a7370;
+  --color-taupe-dark: #4d3f3d;
+
+  --font-playfair: "Cormorant Garamond", "Playfair Display", "Georgia", serif;
+  --font-inter: "Inter", system-ui, sans-serif;
+
+  --background-image-perhaps-hero: radial-gradient(ellipse 80% 60% at 15% 30%, rgba(90,13,20,0.6) 0%, transparent 70%), radial-gradient(ellipse 60% 80% at 85% 70%, rgba(38,6,9,0.8) 0%, transparent 60%);
+  --background-image-card-gradient: linear-gradient(to top, rgba(13,13,13,0.95) 0%, rgba(13,13,13,0.4) 50%, transparent 100%);
+  --background-image-rose-shimmer: linear-gradient(135deg, #EBB4A5 0%, #F6D7CF 40%, #EBB4A5 70%, #d99e8f 100%);
+
+  --shadow-perhaps-soft: 0 8px 24px rgba(0,0,0,0.25);
+  --shadow-perhaps-glow: 0 0 40px rgba(90,13,20,0.4);
+  --shadow-card-hover: 0 20px 60px rgba(0,0,0,0.5);
+  --shadow-rose-glow: 0 0 30px rgba(235,180,165,0.2);
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {

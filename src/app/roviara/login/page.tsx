@@ -48,7 +48,7 @@ export default function RoviaraLogin() {
       <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', background: '#050505' }}>
         <div className="glass-card fade-in" style={{ maxWidth: '400px', width: '100%', textAlign: 'center', padding: '40px 32px' }}>
           
-          <h1 style={{ fontSize: '28px', color: '#f5f0ee', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '8px' }}>ROVIARA</h1>
+          <img src="/logo.jpg" alt="Perhaps" style={{ height: '40px', width: 'auto', borderRadius: '4px', objectFit: 'cover', mixBlendMode: 'lighten', margin: '0 auto 8px auto' }} />
           <p style={{ fontSize: '13px', color: '#7a6b6b', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '40px' }}>
             Staff Command Center
           </p>
