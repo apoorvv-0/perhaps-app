@@ -17,7 +17,7 @@ const PAGE_SIZE = 20;
 export async function GET(request: NextRequest) {
   const session = await getSession();
   if (!session?.phoneVerified || !session.profileComplete) {
-    return NextResponse.json({ eventPhase: event.status, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const event = await getActiveEvent();

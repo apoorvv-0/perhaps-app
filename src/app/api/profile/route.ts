@@ -150,7 +150,7 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const sessionToken = cookieStore.get('session')?.value;
   if (!sessionToken) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   const session = await verifyToken(sessionToken);
