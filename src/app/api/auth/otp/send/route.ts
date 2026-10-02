@@ -1,3 +1,4 @@
+import { normalizeIndiaPhone } from "@/lib/auth/otp";
 /**
  * POST /api/auth/otp/send
  *

@@ -17,6 +17,14 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const session = await getSession(request);
 
+  // ── Roviara Hub (SUPER_ADMIN only) ───────────────────────────
+  if (pathname.startsWith("/roviara") && !pathname.startsWith("/roviara/login")) {
+    if (!session || session.globalRole !== "SUPER_ADMIN") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+    return NextResponse.next();
+  }
+
   // ── SUPER_ADMIN routes ───────────────────────────────────────
   if (pathname.startsWith("/superadmin")) {
     if (!session || session.globalRole !== "SUPER_ADMIN") {
@@ -25,18 +33,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // ── Event Staff routes (Admin/Cashier) ───────────────────────
-  // Note: True permission checking happens in the page/API because
-  // we can't query the EventRole table from Edge middleware.
+  // ── Event Staff routes (Admin/Cashier) — SUPER_ADMIN only ────
   if (pathname.startsWith("/admin") || pathname.startsWith("/cashier")) {
-    if (!session) {
+    if (!session || session.globalRole !== "SUPER_ADMIN") {
       return NextResponse.redirect(new URL("/", request.url));
     }
     return NextResponse.next();
   }
 
   // ── Fully protected routes ───────────────────────────────────
-  const PROTECTED_ROUTES = ["/dashboard", "/directory", "/choices", "/results", "/profile"];
+  const PROTECTED_ROUTES = ["/dashboard", "/directory", "/choices", "/results", "/profile", "/leaderboard"];
   const isProtected = PROTECTED_ROUTES.some((r) => pathname.startsWith(r));
   if (isProtected) {
     if (!session) {
@@ -68,10 +74,12 @@ export const config = {
     "/choices/:path*",
     "/results/:path*",
     "/profile/:path*",
+    "/leaderboard/:path*",
     "/verify-phone/:path*",
     "/admin/:path*",
     "/cashier/:path*",
     "/superadmin/:path*",
+    "/roviara/:path*",
     "/api/:path*",
   ],
 };

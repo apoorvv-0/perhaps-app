@@ -58,10 +58,6 @@ export default function DashboardPage() {
   const displayPhase = PHASE_LABELS[phase] || phase;
 
   const cardStyle = {
-    ...({} as any), // To bypass ts error
-
-    ...({} as any), // To bypass ts error
-
     padding: "24px",
     display: 'flex', flexDirection: 'column' as const, textDecoration: 'none',
     transition: 'all 0.2s ease', cursor: 'pointer'
@@ -78,7 +74,7 @@ export default function DashboardPage() {
       <div style={{ padding: '48px 24px 24px', maxWidth: '800px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <h1 className="serif" style={{ fontSize: '28px', color: '#f5f0ee' }}><span className="gradient-text"><span className="gradient-text">Good evening, {firstName}</span></span></h1>
+            <h1 className="serif" style={{ fontSize: '28px', color: '#f5f0ee' }}><span className="gradient-text"><span className="gradient-text">{(() => { const hour = new Date().getHours(); return hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'; })()}, {firstName}</span></span></h1>
           </div>
           <button onClick={logout} style={{ background: 'none', border: 'none', color: '#7a6b6b', cursor: 'pointer', fontSize: '14px', textDecoration: 'underline' }}>Logout</button>
         </div>

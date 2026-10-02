@@ -34,7 +34,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const body = await req.json();
+  let body;
+  try { body = await req.json(); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
   const { action, nextPhase, eventName } = body;
 
   // ── Create a brand new event ──────────────────────────────
@@ -47,7 +48,11 @@ export async function POST(req: NextRequest) {
     const name = eventName?.trim() || `Perhaps Event`;
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now();
 
-    const newEvent = await prisma.event.create({
+    const newEvent = await prisma.event.updateMany({
+        where: { status: { not: 'ARCHIVED' } },
+        data: { status: 'ARCHIVED' },
+      });
+      await prisma.event.create({
       data: {
         name,
         slug,

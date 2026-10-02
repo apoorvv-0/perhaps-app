@@ -7,8 +7,8 @@ import { useAuth } from "@/components/AuthProvider";
 type Coupon = {
   id: string;
   faceValuePaise: number;
-  status: "ACTIVE" | "REDEEMED" | "VOIDED";
-  buyerPhone: string | null;
+  status: 'ISSUED' | "REDEEMED" | "VOIDED";
+  buyerPhone: string;
   issuedAt: string;
   voidedAt: string | null;
   voidReason: string | null;
@@ -141,19 +141,19 @@ export default function CashierDashboard() {
 
         {/* Ledger Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-#151515 p-4 rounded-lg shadow border border-[#2a2a2a]">
+          <div className="bg-[#151515] p-4 rounded-lg shadow border border-[#2a2a2a]">
             <h3 className="text-sm font-medium text-[#7a6b6b]">Total Net Cash</h3>
             <p className="mt-1 text-2xl font-semibold text-green-600">₹{ledger.summary.netRupees}</p>
           </div>
-          <div className="bg-#151515 p-4 rounded-lg shadow border border-[#2a2a2a]">
+          <div className="bg-[#151515] p-4 rounded-lg shadow border border-[#2a2a2a]">
             <h3 className="text-sm font-medium text-[#7a6b6b]">Collected</h3>
             <p className="mt-1 text-2xl font-semibold text-[#f5f0ee]">₹{ledger.summary.cashCollectedRupees}</p>
           </div>
-          <div className="bg-#151515 p-4 rounded-lg shadow border border-[#2a2a2a]">
+          <div className="bg-[#151515] p-4 rounded-lg shadow border border-[#2a2a2a]">
             <h3 className="text-sm font-medium text-[#7a6b6b]">Refunded</h3>
             <p className="mt-1 text-2xl font-semibold text-red-600">₹{ledger.summary.cashRefundedRupees}</p>
           </div>
-          <div className="bg-#151515 p-4 rounded-lg shadow border border-[#2a2a2a]">
+          <div className="bg-[#151515] p-4 rounded-lg shadow border border-[#2a2a2a]">
             <h3 className="text-sm font-medium text-[#7a6b6b]">Active Coupons</h3>
             <p className="mt-1 text-2xl font-semibold text-[#f5f0ee]">{ledger.summary.activeCount}</p>
           </div>
@@ -161,7 +161,7 @@ export default function CashierDashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           {/* Issue Coupon Form */}
-          <div className="bg-#151515 p-6 rounded-lg shadow border border-[#2a2a2a]">
+          <div className="bg-[#151515] p-6 rounded-lg shadow border border-[#2a2a2a]">
             <h2 className="text-xl font-semibold mb-4 text-[#e0d6d6]">Issue New Coupon</h2>
             <form onSubmit={handleIssue} className="space-y-4">
               {issueError && <p className="text-red-600 text-sm">{issueError}</p>}
@@ -174,7 +174,7 @@ export default function CashierDashboard() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Buyer Phone Number</label>
+                <label className="block text-sm font-medium text-[#7a6b6b]">Buyer Phone Number</label>
                 <div className="mt-1 flex rounded-md shadow-sm">
                   <span className="inline-flex items-center rounded-l-md border border-r-0 border-[#2a2a2a] px-3 text-[#7a6b6b] sm:text-sm bg-[#0d0d0d]">+91</span>
                   <input
@@ -190,7 +190,7 @@ export default function CashierDashboard() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700">Amount Received (₹)</label>
+                <label className="block text-sm font-medium text-[#7a6b6b]">Amount Received (₹)</label>
                 <input
                   type="number"
                   required
@@ -204,7 +204,7 @@ export default function CashierDashboard() {
               <button
                 type="submit"
                 disabled={issuing || issuePhone.length !== 10 || issueAmount <= 0}
-                className="w-full py-2 bg-brand-primary text-#151515 font-medium rounded-md hover:bg-brand-dark disabled:bg-gray-400 transition"
+                className="w-full py-2 bg-brand-primary text-[#f5f0ee] font-medium rounded-md hover:bg-brand-dark disabled:bg-gray-400 transition"
               >
                 {issuing ? "Issuing..." : "Issue Coupon & Collect Cash"}
               </button>
@@ -212,14 +212,14 @@ export default function CashierDashboard() {
           </div>
 
           {/* Void/Refund Coupon Form */}
-          <div className="bg-#151515 p-6 rounded-lg shadow border border-[#2a2a2a]">
+          <div className="bg-[#151515] p-6 rounded-lg shadow border border-[#2a2a2a]">
             <h2 className="text-xl font-semibold mb-4 text-[#e0d6d6]">Void & Refund Coupon</h2>
             <form onSubmit={handleVoid} className="space-y-4">
               {voidError && <p className="text-red-600 text-sm">{voidError}</p>}
               {voidSuccess && <p className="text-green-600 text-sm">{voidSuccess}</p>}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Coupon Code</label>
+                <label className="block text-sm font-medium text-[#7a6b6b]">Coupon Code</label>
                 <input
                   type="text"
                   required
@@ -231,7 +231,7 @@ export default function CashierDashboard() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Reason for Void</label>
+                <label className="block text-sm font-medium text-[#7a6b6b]">Reason for Void</label>
                 <input
                   type="text"
                   required
@@ -246,7 +246,7 @@ export default function CashierDashboard() {
               <button
                 type="submit"
                 disabled={voiding || !voidCode || voidReason.length < 5}
-                className="w-full py-2 bg-red-600 text-#151515 font-medium rounded-md hover:bg-red-700 disabled:bg-gray-400 transition"
+                className="w-full py-2 bg-red-600 text-[#f5f0ee] font-medium rounded-md hover:bg-red-700 disabled:bg-gray-400 transition"
               >
                 {voiding ? "Voiding..." : "Void Coupon & Issue Refund"}
               </button>
@@ -255,7 +255,7 @@ export default function CashierDashboard() {
         </div>
 
         {/* Ledger Table */}
-        <div className="bg-#151515 rounded-lg shadow border border-[#2a2a2a] overflow-hidden">
+        <div className="bg-[#151515] rounded-lg shadow border border-[#2a2a2a] overflow-hidden">
           <div className="px-6 py-4 border-b border-[#2a2a2a]">
             <h2 className="text-lg font-semibold text-[#e0d6d6]">Your Recent Transactions (Ledger)</h2>
           </div>
@@ -270,7 +270,7 @@ export default function CashierDashboard() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-[#7a6b6b] uppercase tracking-wider">Date/Time</th>
                 </tr>
               </thead>
-              <tbody className="bg-#151515 divide-y divide-gray-200">
+              <tbody className="bg-[#151515] divide-y divide-gray-200">
                 {ledger.coupons.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-4 text-center text-[#7a6b6b] text-sm">No transactions found in your ledger.</td>
@@ -278,18 +278,18 @@ export default function CashierDashboard() {
                 ) : (
                   ledger.coupons.map((coupon) => (
                     <tr key={coupon.id} className="hover:bg-[#0d0d0d]">
-                      <td className="px-6 py-4 #151515space-nowrap text-sm font-mono text-[#f5f0ee]">{coupon.id}</td>
-                      <td className="px-6 py-4 #151515space-nowrap text-sm text-[#f5f0ee]">₹{coupon.faceValuePaise / 100}</td>
-                      <td className="px-6 py-4 #151515space-nowrap text-sm">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-[#f5f0ee]">{coupon.id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#f5f0ee]">₹{coupon.faceValuePaise / 100}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                          ${coupon.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 
+                          ${coupon.status === 'ISSUED' ? 'bg-green-100 text-green-800' : 
                             coupon.status === 'REDEEMED' ? 'bg-blue-100 text-blue-800' : 
                             'bg-red-100 text-red-800'}`}>
                           {coupon.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 #151515space-nowrap text-sm text-[#7a6b6b]">{coupon.buyerPhone || "N/A"}</td>
-                      <td className="px-6 py-4 #151515space-nowrap text-sm text-[#7a6b6b]">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#7a6b6b]">{coupon.buyerPhone || "N/A"}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#7a6b6b]">
                         {new Date(coupon.issuedAt).toLocaleString()}
                         {coupon.status === 'VOIDED' && (
                           <div className="text-xs text-red-500 mt-1">Voided: {coupon.voidReason}</div>

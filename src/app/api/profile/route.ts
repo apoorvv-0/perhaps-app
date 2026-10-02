@@ -53,12 +53,7 @@ export async function PUT(request: NextRequest) {
 
   // ── Check event phase ────────────────────────────────────
   const event = await getActiveEvent();
-  if (event && !["DRAFT", "REGISTRATION_OPEN"].includes(event.status)) {
-    return NextResponse.json(
-      { error: "Registration is closed. Your profile is frozen. Contact an admin for corrections." },
-      { status: 403 }
-    );
-  }
+  // Phase check removed for M-22 - only gender/college are frozen in upsert
 
   // ── Parse & validate body ────────────────────────────────
   let body: unknown;
@@ -150,4 +145,24 @@ export async function PUT(request: NextRequest) {
   });
 
   return NextResponse.json({ ok: true, profile });
+}
+
+export async function DELETE(req: NextRequest) {
+  const cookieStore = cookies();
+  const sessionToken = cookieStore.get('session')?.value;
+  if (!sessionToken) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  const session = await verifyToken(sessionToken);
+  if (!session) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  
+  await prisma.profile.deleteMany({ where: { userId: session.userId } });
+  await prisma.user.update({
+    where: { id: session.userId },
+    data: {
+      phoneNumber: `deleted:${session.userId}`,
+      googleId: `deleted:${session.userId}`,
+      status: 'SUSPENDED'
+    }
+  });
+  
+  return NextResponse.json({ success: true });
 }

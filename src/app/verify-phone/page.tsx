@@ -77,26 +77,26 @@ export default function VerifyPhonePage() {
   if (isLoading || !session) return null;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0d0d0d] text-[#f5f0ee] p-4">
-      <div className="w-full max-w-md bg-[#151515] border border-[#2a2a2a] rounded-lg shadow p-6">
-        <h2 className="text-2xl font-bold mb-6 text-center text-white">
+    <div style={{ minHeight: '100vh', background: '#0d0d0d', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ background: '#151515', border: '1px solid #2a2a2a', borderRadius: 12, padding: 32, width: '100%', maxWidth: 400 }}>
+        <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 28, color: '#f5f0ee', textAlign: 'center', marginBottom: 24 }}>
           Verify Your Phone
         </h2>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm">
+          <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.3)', color: '#dc2626', borderRadius: 8, padding: 12, fontSize: 13, marginBottom: 16 }}>
             {error}
           </div>
         )}
 
         {step === "PHONE" && (
-          <form onSubmit={requestOtp} className="space-y-4">
+          <form onSubmit={requestOtp} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <label className="block text-sm font-medium text-[#7a6b6b]">
+              <label style={{ fontSize: 12, color: '#7a6b6b', marginBottom: 8, display: 'block' }}>
                 10-Digit Mobile Number
               </label>
-              <div className="mt-1 flex rounded-md shadow-sm">
-                <span className="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 px-3 text-[#7a6b6b] sm:text-sm">
+              <div style={{ display: 'flex' }}>
+                <span style={{ background: '#1e1e1e', border: '1px solid #2a2a2a', borderRight: 'none', color: '#7a6b6b', padding: '0 12px', display: 'flex', alignItems: 'center', borderRadius: '8px 0 0 8px' }}>
                   +91
                 </span>
                 <input
@@ -104,7 +104,7 @@ export default function VerifyPhonePage() {
                   maxLength={10}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
-                  className="block w-full flex-1 rounded-none rounded-r-md border-gray-300 focus:border-brand-accent focus:ring-brand-accent sm:text-sm p-2 border"
+                  style={{ background: '#1e1e1e', border: '1px solid #2a2a2a', color: '#f5f0ee', borderRadius: '0 8px 8px 0', padding: 12, width: '100%', outline: 'none' }}
                   placeholder="9876543210"
                   required
                 />
@@ -113,7 +113,7 @@ export default function VerifyPhonePage() {
             <button
               type="submit"
               disabled={loading || phone.length !== 10}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#8b1a1a] hover:bg-[#6e1515] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-accent disabled:bg-brand-accent"
+              style={{ width: '100%', padding: 12, background: '#8b1a1a', color: '#f5f0ee', border: 'none', borderRadius: 8, fontWeight: 600, cursor: (loading || phone.length !== 10) ? 'not-allowed' : 'pointer', opacity: (loading || phone.length !== 10) ? 0.7 : 1 }}
             >
               {loading ? "Sending..." : "Send OTP"}
             </button>
@@ -121,9 +121,9 @@ export default function VerifyPhonePage() {
         )}
 
         {step === "OTP" && (
-          <form onSubmit={verifyOtp} className="space-y-4">
+          <form onSubmit={verifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <label className="block text-sm font-medium text-[#7a6b6b]">
+              <label style={{ fontSize: 12, color: '#7a6b6b', marginBottom: 8, display: 'block' }}>
                 Enter 6-digit OTP sent to {phone}
               </label>
               <input
@@ -131,7 +131,7 @@ export default function VerifyPhonePage() {
                 maxLength={6}
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                className="mt-1 block w-full rounded-md border-gray-300 focus:border-brand-accent focus:ring-brand-accent sm:text-sm p-2 border text-center text-lg tracking-widest font-mono"
+                style={{ background: '#1e1e1e', border: '1px solid #2a2a2a', color: '#f5f0ee', borderRadius: 8, padding: 12, textAlign: 'center', fontSize: 20, letterSpacing: '0.3em', width: '100%', outline: 'none' }}
                 placeholder="000000"
                 required
               />
@@ -139,24 +139,24 @@ export default function VerifyPhonePage() {
             <button
               type="submit"
               disabled={loading || otp.length !== 6}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-green-400"
+              style={{ width: '100%', padding: 12, background: '#8b1a1a', color: '#f5f0ee', border: 'none', borderRadius: 8, fontWeight: 600, cursor: (loading || otp.length !== 6) ? 'not-allowed' : 'pointer', opacity: (loading || otp.length !== 6) ? 0.7 : 1 }}
             >
               {loading ? "Verifying..." : "Verify OTP"}
             </button>
             <button
               type="button"
               onClick={() => setStep("PHONE")}
-              className="w-full text-sm text-brand-primary hover:text-brand-accent"
+              style={{ width: '100%', padding: 12, background: 'none', color: '#7a6b6b', border: 'none', cursor: 'pointer', fontSize: 14 }}
             >
               Change phone number
             </button>
           </form>
         )}
 
-        <div className="mt-6 text-center">
+        <div style={{ marginTop: 24, textAlign: 'center' }}>
           <button
             onClick={logout}
-            className="text-sm text-[#7a6b6b] hover:text-white underline"
+            style={{ background: 'none', border: 'none', color: '#7a6b6b', cursor: 'pointer', fontSize: 14, textDecoration: 'underline' }}
           >
             Logout / Start Over
           </button>

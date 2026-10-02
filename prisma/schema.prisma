@@ -77,6 +77,8 @@ model User {
   eventRoles         EventRole[]
 
   @@index([status])
+  consentGivenAt DateTime?
+  consentVersion String?
 }
 
 model Profile {
@@ -139,7 +141,7 @@ model Event {
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
 
-  colleges String @default("[]") // Deprecated: replaced by targetCollege, keeping for backwards compat logic temporarily
+  colleges String @default("[]") // Legacy multi-college support field. Still used in profile validation.
   batches  String @default("[]") // Allowed batches JSON
 
   choices              Choice[]

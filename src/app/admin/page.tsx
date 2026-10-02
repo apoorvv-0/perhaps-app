@@ -600,7 +600,7 @@ export default function AdminDashboard() {
                     <span style={{ color: "#fbbf24" }}>{m.userA_id?.substring(0, 8) ?? m.user1Id?.substring(0, 8)}...</span>
                     <span style={{ color: "#c9a0a0" }}> × </span>
                     <span style={{ color: "#c9a0a0" }}>{m.userB_id?.substring(0, 8) ?? m.user2Id?.substring(0, 8)}...</span>
-                    <span style={{ color: "#3d3030", fontSize: "10px" }}> ({m.score ?? m.matchStrength})</span>
+                    <span style={{ color: "#3d3030", fontSize: "10px" }}> ({m.matchStrength})</span>
                   </p>
                 ))}
               </div>

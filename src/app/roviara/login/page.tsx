@@ -68,7 +68,7 @@ export default function RoviaraLogin() {
               </div>
             )}
 
-            {error && <p style={{ color: '#dc2626', fontSize: '13px', marginTop: '16px', padding: '12px', background: 'rgba(220, 38, 38, 0.1)', borderRadius: '8px', border: '1px solid rgba(220, 38, 38, 0.3)' }}>{error}</p>}
+            {error && <><p style={{ color: '#dc2626', marginBottom: 16 }}>{error}</p><button onClick={() => router.push('/dashboard')} style={{ marginTop: 16, color: '#7a6b6b', fontSize: 13, background: 'none', border: 'none', cursor: 'pointer' }}>&larr; Go to Dashboard</button></>}
           </div>
 
         </div>

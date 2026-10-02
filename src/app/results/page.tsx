@@ -443,7 +443,7 @@ export default function ResultsPage() {
                 </a>
               </div>
 
-              <p style={{ textAlign: "center", fontSize: "11px", color: "#3d3030", marginBottom: 12 }}>
+              <p style={{ textAlign: "center", fontSize: "11px", color: "#7a6b6b", marginBottom: 12 }}>
                 Remember to be respectful and kind.
               </p>
               <Link href="/dashboard" style={{

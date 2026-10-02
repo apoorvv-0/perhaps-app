@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import Link from "next/link";
+import BottomTabBar from "@/components/BottomTabBar";
 
 interface LeaderboardEntry {
   id: string;
@@ -28,6 +29,7 @@ export default function LeaderboardPage() {
   const router = useRouter();
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (!isLoading) {
@@ -42,8 +44,12 @@ export default function LeaderboardPage() {
       if (res.ok) {
         const data = await res.json();
         setEntries(data.entries);
+      } else {
+        setError(true);
       }
-    } catch {} finally {
+    } catch {
+      setError(true);
+    } finally {
       setLoading(false);
     }
   };
@@ -55,22 +61,24 @@ export default function LeaderboardPage() {
     if (list.length === 0) return null;
 
     return (
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-brand-accent/20">
-        <h3 className="text-xl font-sans font-bold text-brand-dark mb-4 pb-2 border-b border-brand-light">{title}</h3>
-        <div className="space-y-4">
+      <div style={{ background: '#151515', border: '1px solid #2a2a2a', borderRadius: 12, padding: 24 }}>
+        <h3 style={{ fontSize: 20, fontWeight: 'bold', color: '#f5f0ee', marginBottom: 16, paddingBottom: 8, borderBottom: '1px solid #2a2a2a' }}>{title}</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {list.map(e => (
-            <div key={e.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-brand-light/30 transition">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg
-                ${e.rank === 1 ? "bg-amber-100 text-amber-600 border border-amber-200" : 
-                  e.rank === 2 ? "bg-slate-100 text-slate-500 border border-slate-200" : 
-                                 "bg-orange-50 text-orange-800 border border-orange-200"}`}>
+            <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: 12, borderRadius: 8 }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: 18,
+                ...(e.rank === 1 ? { background: '#8b1a1a', color: '#f5f0ee' } : 
+                    e.rank === 2 ? { background: '#3d1515', color: '#c9a0a0' } : 
+                                   { background: '#1e1010', color: '#7a6b6b' })
+              }}>
                 #{e.rank}
               </div>
-              <div className="flex-1">
-                <p className="font-semibold text-gray-900">{e.user.profile.firstName} {e.user.profile.lastName}</p>
-                <p className="text-xs text-gray-500">{e.college} • {e.batch}</p>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontWeight: 600, color: '#f5f0ee' }}>{e.user.profile.firstName} {e.user.profile.lastName}</p>
+                <p style={{ fontSize: 12, color: '#7a6b6b' }}>{e.college} • {e.batch}</p>
               </div>
-              <div className="text-brand-primary text-sm font-medium">
+              <div style={{ color: '#7a6b6b', fontSize: 14, fontWeight: 500 }}>
                 @{e.user.profile.instagramHandle}
               </div>
             </div>
@@ -81,42 +89,43 @@ export default function LeaderboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-brand-light/20">
-      <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <Link href="/dashboard" className="text-xl font-bold font-sans text-brand-dark">Perhaps</Link>
-            <Link href="/dashboard" className="text-sm text-brand-accent hover:text-brand-primary">
-              Back to Dashboard
-            </Link>
+    <div style={{ minHeight: '100vh', background: '#0d0d0d', color: '#f5f0ee', paddingBottom: 80 }}>
+      <nav style={{ background: '#151515', borderBottom: '1px solid #2a2a2a' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', height: 64, alignItems: 'center' }}>
+            <Link href="/dashboard" style={{ fontSize: 20, fontWeight: 'bold', color: '#f5f0ee' }}>Perhaps</Link>
+            <Link href="/dashboard" style={{ fontSize: 14, color: '#7a6b6b' }}>Back to Dashboard</Link>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-extrabold text-brand-dark font-sans tracking-tight">The Most Wanted</h1>
-          <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+      <main style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 16px' }}>
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <h1 style={{ fontSize: 36, fontWeight: 800, color: '#f5f0ee', letterSpacing: '-0.02em' }}>The Most Wanted</h1>
+          <p style={{ marginTop: 16, fontSize: 18, color: '#7a6b6b', maxWidth: 600, margin: '16px auto 0' }}>
             These are the most highly requested participants of the season. Did you make the cut?
           </p>
         </div>
 
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-500">Calculating hype...</p>
+          <div style={{ textAlign: 'center', padding: '48px 0' }}>
+            <p style={{ color: '#7a6b6b' }}>Calculating hype...</p>
+          </div>
+        ) : error && entries.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '48px 0', background: '#151515', borderRadius: 12, border: '1px solid #2a2a2a' }}>
+             <p style={{ color: '#dc2626' }}>Failed to load leaderboard.</p>
           </div>
         ) : entries.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100">
-            <span className="text-4xl">👑</span>
-            <h3 className="mt-4 text-lg font-medium text-gray-900">Leaderboard is under wraps</h3>
-            <p className="text-gray-500 mt-2">Check back after the Choosing phase is closed!</p>
+          <div style={{ textAlign: 'center', padding: '48px 0', background: '#151515', borderRadius: 12, border: '1px solid #2a2a2a' }}>
+            <span style={{ fontSize: 36 }}>🤫</span>
+            <h3 style={{ marginTop: 16, fontSize: 18, fontWeight: 500, color: '#f5f0ee' }}>Leaderboard is under wraps</h3>
+            <p style={{ color: '#7a6b6b', marginTop: 8 }}>Check back after the Choosing phase is closed!</p>
           </div>
         ) : (
-          <div className="space-y-12">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 48 }}>
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 px-2 border-l-4 border-brand-primary">Overall Top 3</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <h2 style={{ fontSize: 24, fontWeight: 'bold', color: '#f5f0ee', marginBottom: 24, paddingLeft: 8, borderLeft: '4px solid #8b1a1a' }}>Overall Top 3</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
                 {renderTop3("overall", "FEMALE", "Most Wanted Girls")}
                 {renderTop3("overall", "MALE", "Most Wanted Boys")}
               </div>
@@ -124,6 +133,7 @@ export default function LeaderboardPage() {
           </div>
         )}
       </main>
+      <BottomTabBar />
     </div>
   );
 }

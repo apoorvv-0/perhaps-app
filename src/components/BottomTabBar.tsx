@@ -54,7 +54,7 @@ export default function BottomTabBar() {
       zIndex: 50
     }}>
       {tabs.map(tab => {
-        const isActive = pathname.startsWith(tab.path);
+        const isActive = pathname === tab.path || pathname.startsWith(tab.path + '/');
         return (
           <button key={tab.id}
             onClick={() => router.push(tab.path)}

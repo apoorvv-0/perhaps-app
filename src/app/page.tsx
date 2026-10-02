@@ -26,7 +26,7 @@ export default function PerhapsLanding() {
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     if (!ageConsent || !dataConsent) {
-      setError("You must agree to the DPDP compliance terms to create a Roviara ID.");
+      setError("You must accept the terms above to continue registering for the event.");
       return;
     }
     setError("");
@@ -59,7 +59,7 @@ export default function PerhapsLanding() {
     else setError("Dev login failed");
   };
 
-  if (isLoading || session) return null;
+  if (isLoading || session) return <div style={{ minHeight: '100vh', background: '#0d0d0d' }} />;
 
   if (showRoviaraAuth) {
     return (

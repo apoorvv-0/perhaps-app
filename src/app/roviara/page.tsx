@@ -10,6 +10,7 @@ export default function RoviaraHub() {
   const router = useRouter();
   
   const [stats, setStats] = useState<any>(null);
+  const [statsLoaded, setStatsLoaded] = useState(false);
 
   useEffect(() => {
     if (!isLoading) {

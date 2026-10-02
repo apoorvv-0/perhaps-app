@@ -57,7 +57,7 @@ export default function ProfileSetupPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [initialFetchDone, setInitialFetchDone] = useState(false);
+  const initialFetchDoneRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (!isLoading) {
@@ -78,11 +78,11 @@ export default function ProfileSetupPage() {
               setInstagram(data.profile.instagramHandle);
               setIsEditMode(true);
             }
-            setInitialFetchDone(true);
+            initialFetchDoneRef.current = true;
           })
           .catch(() => setInitialFetchDone(true));
       } else if (!session.profileComplete) {
-        setInitialFetchDone(true);
+        initialFetchDoneRef.current = true;
       }
     }
   }, [session, isLoading, router, initialFetchDone]);
@@ -310,7 +310,7 @@ export default function ProfileSetupPage() {
                   type="text"
                   required
                   value={instagram}
-                  onChange={(e) => setInstagram(e.target.value.replace(/^@/, ''))}
+                  onChange={(e) => setInstagram(e.target.value.replace(/^@+/, ''))}
                   style={{
                     ...inputStyle,
                     borderRadius: "0 8px 8px 0",
@@ -376,6 +376,19 @@ export default function ProfileSetupPage() {
               </button>
             </div>
           </form>
+<div style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid #2a2a2a' }}>
+  <p style={{ color: '#7a6b6b', fontSize: 13, marginBottom: 12 }}>Data & Privacy</p>
+  <button 
+    onClick={() => {
+      if (confirm('This will permanently delete your account and all data. This cannot be undone.')) {
+        fetch('/api/profile', { method: 'DELETE' }).then(() => { window.location.href = '/'; });
+      }
+    }}
+    style={{ background: 'none', border: '1px solid #3d1515', color: '#7a6b6b', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}
+  >
+    Delete Account
+  </button>
+</div>
         </div>
       </div>
 
