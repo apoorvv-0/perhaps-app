@@ -47,7 +47,7 @@ export async function runPhaseTransitionCheck(): Promise<void> {
   const regCloseEvents = await prisma.event.findMany({
     where: {
       status: "REGISTRATION_OPEN",
-      registrationEndsAt: { lte: now },
+      registrationEndAt: { lte: now },
     },
   });
 
@@ -59,7 +59,7 @@ export async function runPhaseTransitionCheck(): Promise<void> {
   const choiceCloseEvents = await prisma.event.findMany({
     where: {
       status: "CHOOSING_OPEN",
-      choosingEndsAt: { lte: now },
+      choosingEndAt: { lte: now },
     },
   });
 
@@ -134,14 +134,14 @@ export async function checkPopulationMinimum(
 
   const registrations = await prisma.eventRegistration.findMany({
     where: { eventId },
-    include: { user: { include: { profile: true } } },
+    include: { user: true },
   });
 
   const active = registrations.filter(
-    (r) => r.user.status === "ACTIVE" && r.user.profile
+    (r) => r.user.status === "ACTIVE"
   );
-  const maleCount = active.filter((r) => r.user.profile?.gender === "MALE").length;
-  const femaleCount = active.filter((r) => r.user.profile?.gender === "FEMALE").length;
+  const maleCount = active.filter((r) => r.user.gender === "MALE").length;
+  const femaleCount = active.filter((r) => r.user.gender === "FEMALE").length;
   const totalParticipants = active.length;
 
   const passed =

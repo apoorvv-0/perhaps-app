@@ -1,11 +1,3 @@
-/**
- * GET  /api/directory    — Browse opposite-gender participants
- * 
- * Returns paginated list of opposite-gender active participants.
- * Includes duplicate-name warning flags (Decision #11).
- * Hidden fields: gender, instagramHandle (only visible post-match reveal).
- */
-
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { getSession } from "@/lib/auth/session";
@@ -22,86 +14,45 @@ export async function GET(request: NextRequest) {
 
   const event = await getActiveEvent();
   if (!event) {
-    return NextResponse.json(
-      { error: "No active event.", eventPhase: null },
-      { status: 403 }
-    );
+    return NextResponse.json({ error: "No active event.", eventPhase: null }, { status: 403 });
   }
   if (event.status !== "CHOOSING_OPEN" && event.status !== "CHOOSING_CLOSED") {
-    return NextResponse.json(
-      { error: "Choosing is not currently open.", eventPhase: event.status },
-      { status: 403 }
-    );
+    return NextResponse.json({ error: "Choosing is not currently open.", eventPhase: event.status }, { status: 403 });
   }
 
-  // Get the current user's gender
-  const myProfile = await prisma.profile.findUnique({
-    where: { userId: session.userId },
-  });
-  if (!myProfile) {
-    return NextResponse.json({ error: "Profile not found" }, { status: 404 });
-  }
+  const myUser = await prisma.user.findUnique({ where: { id: session.userId } });
+  if (!myUser) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
 
-  const oppositeGender: Gender = myProfile.gender === "MALE" ? "FEMALE" : "MALE";
-
-  // Parse query params
+  const oppositeGender: Gender = myUser.gender === "MALE" ? "FEMALE" : "MALE";
   const { searchParams } = new URL(request.url);
   const search = searchParams.get("search")?.trim() ?? "";
   const college = searchParams.get("college") ?? "";
   const batch = searchParams.get("batch") ?? "";
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
 
-  // Build where clause
-  const where: Prisma.ProfileWhereInput = {
+  const where: Prisma.UserWhereInput = {
     gender: oppositeGender,
-    user: {
-      status: "ACTIVE",
-      // Must be registered in this event
-      eventRegistrations: {
-        some: { eventId: event.id },
-      },
-    },
+    status: "ACTIVE",
+    eventRegistrations: { some: { eventId: event.id } },
     ...(college ? { college } : {}),
     ...(batch ? { batch } : {}),
-    ...(search
-      ? {
-          OR: [
-            { firstName: { contains: search } },
-            { lastName: { contains: search } },
-          ],
-        }
-      : {}),
+    ...(search ? { OR: [{ firstName: { contains: search } }, { lastName: { contains: search } }] } : {}),
   };
 
   const [profiles, total] = await Promise.all([
-    prisma.profile.findMany({
+    prisma.user.findMany({
       where,
-      select: {
-        userId: true,
-        firstName: true,
-        lastName: true,
-        college: true,
-        batch: true,
-        // gender & instagramHandle intentionally excluded from directory
-      },
+      select: { id: true, firstName: true, lastName: true, college: true, batch: true },
       orderBy: [{ firstName: "asc" }, { lastName: "asc" }],
       skip: (page - 1) * PAGE_SIZE,
-      
+      take: PAGE_SIZE
     }),
-    prisma.profile.count({ where }),
+    prisma.user.count({ where }),
   ]);
 
-  // ── Duplicate-name warning (Decision #11) ─
-  // For each profile in results, flag if another participant shares the same full name
-  const allNames = await prisma.profile.findMany({
-    where: {
-      gender: oppositeGender,
-      user: {
-        status: "ACTIVE",
-        eventRegistrations: { some: { eventId: event.id } },
-      },
-    },
-    select: { userId: true, firstName: true, lastName: true },
+  const allNames = await prisma.user.findMany({
+    where: { gender: oppositeGender, status: "ACTIVE", eventRegistrations: { some: { eventId: event.id } } },
+    select: { id: true, firstName: true, lastName: true },
   });
 
   const nameCounts = new Map<string, number>();
@@ -111,21 +62,14 @@ export async function GET(request: NextRequest) {
   }
 
   const enriched = profiles.map((p) => ({
-    ...p,
-    hasDuplicateName:
-      (nameCounts.get(
-        `${p.firstName.toLowerCase()}|${p.lastName.toLowerCase()}`
-      ) ?? 0) > 1,
+    userId: p.id,
+    firstName: p.firstName, lastName: p.lastName, college: p.college, batch: p.batch,
+    hasDuplicateName: (nameCounts.get(`${p.firstName.toLowerCase()}|${p.lastName.toLowerCase()}`) ?? 0) > 1,
   }));
 
   return NextResponse.json({
     participants: enriched,
     eventPhase: event.status,
-    pagination: {
-      total,
-      page,
-      pageSize: PAGE_SIZE,
-      totalPages: Math.ceil(total / PAGE_SIZE),
-    },
+    pagination: { total, page, pageSize: PAGE_SIZE, totalPages: Math.ceil(total / PAGE_SIZE) },
   });
 }

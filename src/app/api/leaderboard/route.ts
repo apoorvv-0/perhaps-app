@@ -19,14 +19,19 @@ export async function GET() {
     where: { eventId: event.id, rank: { lte: 3 } },
     include: {
       user: {
-        include: {
-          profile: {
-            select: { firstName: true, lastName: true, instagramHandle: true }
-          }
-        }
+        select: { firstName: true, lastName: true, instagramHandle: true }
       }
     }
   });
 
-  return NextResponse.json({ entries });
+  return NextResponse.json({ entries: entries.map(e => ({
+    ...e,
+    user: {
+      profile: {
+        firstName: e.user.firstName,
+        lastName: e.user.lastName,
+        instagramHandle: e.user.instagramHandle
+      }
+    }
+  })) });
 }

@@ -20,27 +20,35 @@ export async function generateLeaderboard(eventId: string, adminId: string) {
 
   // Get profiles for all picked users who opted in
   const userIds = Object.keys(pickCounts);
-  const profiles = await prisma.profile.findMany({
+  const profiles = await prisma.user.findMany({
     where: {
-      userId: { in: userIds },
+      id: { in: userIds },
       leaderboardOptIn: true,
-      user: { status: "ACTIVE" },
+      status: "ACTIVE",
     },
   });
 
   // Attach counts to profiles
-  const rankedUsers = profiles.map(p => ({
-    userId: p.userId,
-    gender: p.gender,
-    college: p.college,
-    batch: p.batch,
-    pickerCount: pickCounts[p.userId],
+  type RankedUser = {
+    userId: string;
+    gender: "MALE" | "FEMALE";
+    college: string;
+    batch: string;
+    pickerCount: number;
+  };
+
+  const rankedUsers: RankedUser[] = profiles.map(p => ({
+    userId: p.id,
+    gender: p.gender as "MALE" | "FEMALE",
+    college: p.college || "",
+    batch: p.batch || "",
+    pickerCount: pickCounts[p.id],
   }));
 
   // Helper to get Top N and insert
   const insertTopN = async (
     sliceName: string,
-    filteredUsers: typeof rankedUsers,
+    filteredUsers: RankedUser[],
     limit: number = 3
   ) => {
     // Sort descending by pickerCount
