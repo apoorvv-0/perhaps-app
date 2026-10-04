@@ -23,18 +23,16 @@ async function buildFrozenSnapshot(eventId: string) {
   const registrations = await prisma.eventRegistration.findMany({
     where: { eventId },
     include: {
-      user: {
-        include: { profile: true },
-      },
+      user: true,
     },
   });
 
   const participants: FrozenParticipant[] = registrations
-    .filter((r) => r.user.profile && r.user.status !== "DELETED")
+    .filter((r) => r.user.status !== "DELETED")
     .map((r) => ({
       userId: r.userId,
-      gender: r.user.profile!.gender,
-      signupTime: r.user.profile!.signupTime,
+      gender: r.user.gender as any,
+      signupTime: r.user.createdAt, // user.createdAt acts as signupTime
       status: r.user.status as "ACTIVE" | "SUSPENDED" | "DELETED",
     }));
 

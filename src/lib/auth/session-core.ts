@@ -13,6 +13,7 @@ export interface SessionPayload {
   /** Intermediate state: Google linked but phone not yet verified */
   pendingPhoneLink?: boolean;
   googleId?: string;
+  eventRoles?: string[];
 }
 
 // ─────────────────────────────────────────────

@@ -80,6 +80,7 @@ export async function issueCoupon(input: IssueCouponInput) {
 export interface RedeemCouponInput {
   code: string;
   redeemedByUserId: string;
+  requiredPaise?: number; // Optional face value required for this specific redemption
 }
 
 export type RedeemResult =
@@ -99,6 +100,11 @@ export async function redeemCoupon(
   }
   if (coupon.status === "VOIDED") {
     return { ok: false, error: "This coupon has been voided." };
+  }
+
+  // Enforce required face value if specified
+  if (input.requiredPaise !== undefined && coupon.faceValue !== input.requiredPaise) {
+    return { ok: false, error: `This action requires a coupon worth ₹${input.requiredPaise / 100}. This coupon is worth ₹${coupon.faceValue / 100}.` };
   }
 
   await prisma.coupon.update({
@@ -177,9 +183,9 @@ export async function voidCoupon(input: VoidCouponInput): Promise<VoidResult> {
 // Cashier Ledger
 // ─────────────────────────────────────────────
 
-export async function getCashierLedger(cashierId: string) {
+export async function getCashierLedger(cashierId: string, eventId: string) {
   const coupons = await prisma.coupon.findMany({
-    where: { cashierId },
+    where: { cashierId, eventId },
     orderBy: { issuedAt: "desc" },
   });
 

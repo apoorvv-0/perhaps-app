@@ -58,7 +58,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!isLoading) {
       if (!session) router.push("/");
-      else if (session.globalRole !== "SUPER_ADMIN") router.push("/dashboard");
+      else if (session.globalRole !== "SUPER_ADMIN" && !session.eventRoles?.includes("ADMIN")) router.push("/dashboard");
       else fetchEvent();
     }
   }, [session, isLoading, router]);

@@ -84,8 +84,8 @@ export async function POST(request: NextRequest) {
   });
 
   const matchedUserId = isUser1 ? match.user2Id : match.user1Id;
-  const matchedProfile = await prisma.profile.findUnique({
-    where: { userId: matchedUserId },
+  const matchedProfile = await prisma.user.findUnique({
+    where: { id: matchedUserId },
     select: {
       firstName: true,
       lastName: true,

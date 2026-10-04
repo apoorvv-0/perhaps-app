@@ -133,8 +133,8 @@ export async function ledgerHandler() {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // Ledger is currently scoped by cashierId (from coupon-service)
-  const ledger = await getCashierLedger(session.userId);
+  // Ledger is currently scoped by cashierId and eventId
+  const ledger = await getCashierLedger(session.userId, event.id);
 
   return NextResponse.json({
     ...ledger,

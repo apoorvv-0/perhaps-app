@@ -26,7 +26,10 @@ export async function GET() {
           gender: true,
           instagramHandle: true,
           globalRole: true,
-          status: true
+          status: true,
+          eventRoles: {
+            where: { eventId: event.id }
+          }
         }
       },
     },
@@ -36,7 +39,8 @@ export async function GET() {
   // Flatten for frontend
   const users = registrations.map(r => ({
     ...r.user,
-    minChoiceExempt: r.minChoiceExempt
+    minChoiceExempt: r.minChoiceExempt,
+    eventRoles: r.user.eventRoles.map(er => er.role)
   }));
 
   return NextResponse.json({ users });
@@ -50,7 +54,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { userId, status, minChoiceExempt } = body;
+  const { userId, status, minChoiceExempt, toggleEventRole } = body;
 
   if (userId === session.userId) {
     return NextResponse.json({ error: "You cannot change your own status." }, { status: 403 });
@@ -65,12 +69,25 @@ export async function PATCH(req: NextRequest) {
   }
 
   // Update event-specific exemption
-  if (minChoiceExempt !== undefined) {
-    const event = await getActiveEvent();
-    if (event) {
-      await prisma.eventRegistration.update({
-        where: { eventId_userId: { eventId: event.id, userId } },
-        data: { minChoiceExempt },
+  const event = await getActiveEvent();
+  if (minChoiceExempt !== undefined && event) {
+    await prisma.eventRegistration.update({
+      where: { eventId_userId: { eventId: event.id, userId } },
+      data: { minChoiceExempt },
+    });
+  }
+
+  // Toggle Event Role (e.g. CASHIER or ADMIN)
+  if (toggleEventRole && event) {
+    const existingRole = await prisma.eventRole.findUnique({
+      where: { eventId_userId_role: { eventId: event.id, userId, role: toggleEventRole } }
+    });
+
+    if (existingRole) {
+      await prisma.eventRole.delete({ where: { id: existingRole.id } });
+    } else {
+      await prisma.eventRole.create({
+        data: { eventId: event.id, userId, role: toggleEventRole }
       });
     }
   }

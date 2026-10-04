@@ -64,7 +64,9 @@ export default function DashboardPage() {
 
   if (isLoading || !session) return <div style={{ minHeight: '100vh', background: '#2B0609' }} />;
 
-  const isAdmin = session.globalRole === "SUPER_ADMIN";
+  const isSuperAdmin = session.globalRole === "SUPER_ADMIN";
+  const isEventAdmin = session.eventRoles?.includes("ADMIN");
+  const isCashier = session.eventRoles?.includes("CASHIER");
   const displayPhase = PHASE_LABELS[phase] || phase;
 
   const cardStyle = {
@@ -135,7 +137,6 @@ export default function DashboardPage() {
           </Link>
         )}
 
-        {/* Instead of text 'Directory', rename it 'Discover' to match mockup */}
         <Link href="/directory" className="charcoal-card" style={cardStyle} onMouseOver={hoverProps.onMouseOver} onMouseOut={hoverProps.onMouseOut}>
           <h2 className="font-playfair text-[20px] text-brand-blush mb-1">Discover</h2>
           <p className="text-[13px] text-brand-taupe">Browse and rank your potential matches.</p>
@@ -153,25 +154,32 @@ export default function DashboardPage() {
           <p className="text-[13px] text-brand-taupe">Edit your personal details.</p>
         </Link>
 
-        {isAdmin && (
+        {(isSuperAdmin || isEventAdmin || isCashier) && (
           <>
             <div className="col-span-1 sm:col-span-2 mt-4 mb-2">
               <p className="text-[11px] text-brand-taupe uppercase tracking-widest font-bold px-1">Admin Tools</p>
             </div>
-            <Link href="/roviara" className="charcoal-card" style={cardStyle} onMouseOver={hoverProps.onMouseOver} onMouseOut={hoverProps.onMouseOut}>
-              <h2 className="font-playfair text-[20px] text-brand-rose mb-1">Roviara Hub</h2>
-              <p className="text-[13px] text-brand-taupe">SuperAdmin command center.</p>
-            </Link>
+            
+            {isSuperAdmin && (
+              <Link href={process.env.NEXT_PUBLIC_ROVIARA_URL ? `${process.env.NEXT_PUBLIC_ROVIARA_URL}/superadmin` : "#"} className="charcoal-card" style={cardStyle} onMouseOver={hoverProps.onMouseOver} onMouseOut={hoverProps.onMouseOut}>
+                <h2 className="font-playfair text-[20px] text-brand-rose mb-1">Roviara Hub</h2>
+                <p className="text-[13px] text-brand-taupe">SuperAdmin command center.</p>
+              </Link>
+            )}
 
-            <Link href="/admin" className="charcoal-card" style={cardStyle} onMouseOver={hoverProps.onMouseOver} onMouseOut={hoverProps.onMouseOut}>
-              <h2 className="font-playfair text-[20px] text-brand-blush mb-1">Event Control</h2>
-              <p className="text-[13px] text-brand-taupe">Manage phases & matching.</p>
-            </Link>
+            {(isSuperAdmin || isEventAdmin) && (
+              <Link href="/admin" className="charcoal-card" style={cardStyle} onMouseOver={hoverProps.onMouseOver} onMouseOut={hoverProps.onMouseOut}>
+                <h2 className="font-playfair text-[20px] text-brand-blush mb-1">Event Control</h2>
+                <p className="text-[13px] text-brand-taupe">Manage phases & matching.</p>
+              </Link>
+            )}
 
-            <Link href="/cashier" className="charcoal-card" style={cardStyle} onMouseOver={hoverProps.onMouseOver} onMouseOut={hoverProps.onMouseOut}>
-              <h2 className="font-playfair text-[20px] text-brand-blush mb-1">Cashier</h2>
-              <p className="text-[13px] text-brand-taupe">Issue coupons & verify payments.</p>
-            </Link>
+            {(isSuperAdmin || isCashier) && (
+              <Link href="/cashier" className="charcoal-card" style={cardStyle} onMouseOver={hoverProps.onMouseOver} onMouseOut={hoverProps.onMouseOut}>
+                <h2 className="font-playfair text-[20px] text-brand-blush mb-1">Cashier</h2>
+                <p className="text-[13px] text-brand-taupe">Issue coupons & verify payments.</p>
+              </Link>
+            )}
           </>
         )}
       </div>

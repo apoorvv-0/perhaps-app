@@ -51,8 +51,8 @@ export async function GET() {
 
   if (isRevealed) {
     // Show full contact details only after reveal
-    const matchedProfile = await prisma.profile.findUnique({
-      where: { userId: matchedUserId },
+    const matchedProfile = await prisma.user.findUnique({
+      where: { id: matchedUserId },
       select: {
         firstName: true,
         lastName: true,
@@ -64,8 +64,8 @@ export async function GET() {
     response.matchedUser = matchedProfile;
   } else {
     // Just enough to show "You have a match!" without leaking identity
-    const matchedProfile = await prisma.profile.findUnique({
-      where: { userId: matchedUserId },
+    const matchedProfile = await prisma.user.findUnique({
+      where: { id: matchedUserId },
       select: { college: true, batch: true },
     });
     response.hint = {

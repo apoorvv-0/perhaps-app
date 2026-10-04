@@ -47,7 +47,7 @@ export default function CashierDashboard() {
   useEffect(() => {
     if (!isLoading) {
       if (!session) router.push("/");
-      else if (session.globalRole !== "SUPER_ADMIN") router.push("/dashboard");
+      else if (session.globalRole !== "SUPER_ADMIN" && !session.eventRoles?.includes("CASHIER")) router.push("/dashboard");
       else fetchLedger();
     }
   }, [session, isLoading, router]);
