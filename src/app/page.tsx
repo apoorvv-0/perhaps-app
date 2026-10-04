@@ -30,7 +30,7 @@ export default function PerhapsLanding() {
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-brand-burgundy/40 via-brand-wine/0 to-brand-wine/0" />
 
       <div className="flex-1 flex flex-col items-center justify-center px-6 text-center relative z-10 w-full max-w-md mx-auto">
-        <h1 className="text-5xl font-cormorant font-bold mb-4 tracking-wide text-brand-gold">
+        <h1 className="text-5xl font-playfair font-bold mb-4 tracking-wide text-brand-blush">
           Perhaps
         </h1>
         
@@ -40,7 +40,7 @@ export default function PerhapsLanding() {
 
         <button
           onClick={handleLogin}
-          className="w-full bg-brand-gold text-brand-wine font-semibold py-4 rounded-xl hover:bg-white transition-all shadow-[0_0_20px_rgba(235,213,184,0.3)] hover:shadow-[0_0_30px_rgba(235,213,184,0.5)] active:scale-95"
+          className="w-full btn-primary font-semibold py-4"
         >
           Log in with Roviara
         </button>
