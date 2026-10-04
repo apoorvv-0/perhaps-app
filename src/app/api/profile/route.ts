@@ -94,7 +94,7 @@ export async function DELETE(req: NextRequest) {
   
   await prisma.user.update({
     where: { id: session.userId },
-    data: { phoneNumber: `deleted:${session.userId}`, googleId: `deleted:${session.userId}`, status: 'SUSPENDED' }
+    data: { status: 'SUSPENDED' }
   });
   
   return NextResponse.json({ success: true });

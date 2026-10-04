@@ -23,7 +23,7 @@ export async function generateLeaderboard(eventId: string, adminId: string) {
   const profiles = await prisma.user.findMany({
     where: {
       id: { in: userIds },
-      leaderboardOptIn: true,
+      
       status: "ACTIVE",
     },
   });

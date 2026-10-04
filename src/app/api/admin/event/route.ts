@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       data: {
         name,
         slug,
-        targetCollege: "Seth GS Medical College", // Default for now
+        
         status: "DRAFT",
         colleges: "[]",
         batches: "[]",
