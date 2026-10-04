@@ -7,9 +7,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // ENUMS
-// ─────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 enum GlobalRole {
   USER
@@ -50,88 +50,57 @@ enum CouponStatus {
   VOIDED
 }
 
-// ─────────────────────────────────────────────
-// CORE IDENTITY (Global Roviara Account)
-// ─────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// LOCAL IDENTITY (Synced from Roviara Hub)
+// -----------------------------------------------------------------------------
 
 model User {
-  id          String     @id @default(uuid())
-  googleId    String     @unique
-  phoneNumber String     @unique
-  globalRole  GlobalRole @default(USER)
-  status      UserStatus @default(ACTIVE)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id              String     @id @default(uuid())
+  roviaraId       String     @unique // Links to Roviara Hub User ID
+  firstName       String
+  lastName        String
+  instagramHandle String?
+  gender          Gender
+  college         String
+  batch           String
+  
+  globalRole      GlobalRole @default(USER)
+  status          UserStatus @default(ACTIVE)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
-  profile           Profile?
-  otpRequests       OtpRequest[]
-  pickerChoices     Choice[]           @relation("PickerChoices")
-  pickedChoices     Choice[]           @relation("PickedChoices")
-  matchesAsUser1    Match[]            @relation("MatchUser1")
-  matchesAsUser2    Match[]            @relation("MatchUser2")
-  couponsIssued     Coupon[]           @relation("CashierCoupons")
-  auditLogsAsAdmin  AuditLog[]         @relation("AdminAuditLogs")
-  matchingExecs     MatchingExecution[]
+  pickerChoices      Choice[]           @relation("PickerChoices")
+  pickedChoices      Choice[]           @relation("PickedChoices")
+  matchesAsUser1     Match[]            @relation("MatchUser1")
+  matchesAsUser2     Match[]            @relation("MatchUser2")
+  couponsIssued      Coupon[]           @relation("CashierCoupons")
+  auditLogsAsAdmin   AuditLog[]         @relation("AdminAuditLogs")
+  matchingExecs      MatchingExecution[]
   leaderboardEntries LeaderboardEntry[]
   eventRegistrations EventRegistration[]
   eventRoles         EventRole[]
 
+  // Perhaps Compatible additions
+  anonymousLikesSent     AnonymousLike[] @relation("Liker")
+  anonymousLikesReceived AnonymousLike[] @relation("Liked")
+  compatibilityAnswers   CompatibilityAnswer[]
+
   @@index([status])
-  consentGivenAt DateTime?
-  consentVersion String?
 }
 
-model Profile {
-  userId          String   @id
-  user            User     @relation(fields: [userId], references: [id])
-  firstName       String
-  lastName        String
-  instagramHandle String
-  gender          Gender
-  college         String   // e.g. "KEM Mumbai"
-  batch           String
-  signupTime      DateTime @default(now())
-  leaderboardOptIn Boolean @default(true)
-  ageAttestation  Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@index([gender])
-  @@index([college])
-  @@index([batch])
-}
-
-// ─────────────────────────────────────────────
-// OTP RATE LIMITING
-// ─────────────────────────────────────────────
-
-model OtpRequest {
-  id          String   @id @default(uuid())
-  userId      String?
-  user        User?    @relation(fields: [userId], references: [id])
-  phoneNumber String
-  otpHash     String?
-  sentAt      DateTime @default(now())
-  expiresAt   DateTime
-  verified    Boolean  @default(false)
-  attempts    Int      @default(0)
-
-  @@index([phoneNumber, sentAt])
-}
-
-// ─────────────────────────────────────────────
-// EVENT & MARKETPLACE
-// ─────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// PERHAPS MUTUAL (Event Matching)
+// -----------------------------------------------------------------------------
 
 model Event {
   id                   String     @id @default(uuid())
-  name                 String
   slug                 String     @unique
-  targetCollege        String     // e.g. "KEM Mumbai" - only students from this college can join
+  name                 String
   status               EventPhase @default(DRAFT)
-  registrationEndsAt   DateTime?
-  choosingEndsAt       DateTime?
-  resultsDurationHours Int        @default(72)
+  registrationStartAt  DateTime?
+  registrationEndAt    DateTime?
+  choosingStartAt      DateTime?
+  choosingEndAt        DateTime?
   resultsStartAt       DateTime?
   resultsEndAt         DateTime?
   minimumParticipants  Int        @default(200)
@@ -141,8 +110,8 @@ model Event {
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
 
-  colleges String @default("[]") // Legacy multi-college support field. Still used in profile validation.
-  batches  String @default("[]") // Allowed batches JSON
+  colleges String @default("[]") 
+  batches  String @default("[]") 
 
   choices              Choice[]
   matches              Match[]
@@ -156,7 +125,6 @@ model Event {
   @@index([slug])
 }
 
-// Assigns Admin/Cashier roles to a specific event
 model EventRole {
   id        String        @id @default(uuid())
   eventId   String
@@ -170,7 +138,6 @@ model EventRole {
   @@index([userId])
 }
 
-// Links a user to an event (registration)
 model EventRegistration {
   id        String   @id @default(uuid())
   eventId   String
@@ -183,7 +150,6 @@ model EventRegistration {
   @@index([eventId])
 }
 
-// Audit trail for phase overrides
 model PhaseOverride {
   id          String   @id @default(uuid())
   eventId     String
@@ -197,10 +163,6 @@ model PhaseOverride {
   @@index([eventId])
 }
 
-// ─────────────────────────────────────────────
-// CHOICES
-// ─────────────────────────────────────────────
-
 model Choice {
   id        String   @id @default(uuid())
   eventId   String
@@ -209,7 +171,7 @@ model Choice {
   picker    User     @relation("PickerChoices", fields: [pickerId], references: [id])
   pickedId  String
   picked    User     @relation("PickedChoices", fields: [pickedId], references: [id])
-  rank      Int      // 1 to 12; 1 = most wanted
+  rank      Int      
   createdAt DateTime @default(now())
 
   @@unique([eventId, pickerId, pickedId])
@@ -217,10 +179,6 @@ model Choice {
   @@index([eventId, pickerId])
   @@index([eventId, pickedId])
 }
-
-// ─────────────────────────────────────────────
-// MATCHING
-// ─────────────────────────────────────────────
 
 model MatchingExecution {
   id             String   @id @default(uuid())
@@ -243,24 +201,20 @@ model Match {
   id            String   @id @default(uuid())
   eventId       String
   event         Event    @relation(fields: [eventId], references: [id])
-  user1Id       String   // Canonically lower UUID
+  user1Id       String   
   user1         User     @relation("MatchUser1", fields: [user1Id], references: [id])
   user2Id       String
   user2         User     @relation("MatchUser2", fields: [user2Id], references: [id])
-  matchStrength Int      // rank(A→B) + rank(B→A); lower = stronger
+  matchStrength Int      
   createdAt     DateTime @default(now())
-  revealed1     Boolean  @default(false) // user1 has revealed (paid)
-  revealed2     Boolean  @default(false) // user2 has revealed (paid)
+  revealed1     Boolean  @default(false) 
+  revealed2     Boolean  @default(false) 
 
   @@unique([eventId, user1Id, user2Id])
   @@index([eventId])
   @@index([eventId, user1Id])
   @@index([eventId, user2Id])
 }
-
-// ─────────────────────────────────────────────
-// LEADERBOARD
-// ─────────────────────────────────────────────
 
 model LeaderboardEntry {
   id          String   @id @default(uuid())
@@ -271,23 +225,63 @@ model LeaderboardEntry {
   gender      Gender
   college     String
   batch       String
-  pickerCount Int      // distinct opted-in pickers
-  rank        Int      // 1, 2, or 3 within slice
-  slice       String   // "overall", "college:AIIMS Delhi", "batch:2022"
+  pickerCount Int      
+  rank        Int      
+  slice       String   
   computedAt  DateTime @default(now())
 
   @@unique([eventId, userId, slice])
   @@index([eventId, slice, gender, rank])
 }
 
-// ─────────────────────────────────────────────
-// COUPON SYSTEM
-// ─────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// PERHAPS COMPATIBLE (Personality Matching)
+// -----------------------------------------------------------------------------
+
+model CompatibilityQuestion {
+  id          String   @id @default(uuid())
+  question    String
+  category    String   // e.g. "Lifestyle", "Values"
+  options     Json     // Array of possible answers
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  
+  answers     CompatibilityAnswer[]
+}
+
+model CompatibilityAnswer {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  questionId  String
+  question    CompatibilityQuestion @relation(fields: [questionId], references: [id])
+  answerValue String
+  importance  Int      // 1-5 scale of how important this is in a partner
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, questionId])
+}
+
+model AnonymousLike {
+  id          String   @id @default(uuid())
+  likerId     String
+  liker       User     @relation("Liker", fields: [likerId], references: [id])
+  likedId     String
+  liked       User     @relation("Liked", fields: [likedId], references: [id])
+  createdAt   DateTime @default(now())
+  revealed    Boolean  @default(false) // Whether liked user paid to reveal instagram
+
+  @@unique([likerId, likedId])
+}
+
+// -----------------------------------------------------------------------------
+// COUPONS & SYSTEM
+// -----------------------------------------------------------------------------
 
 model Coupon {
-  id         String       @id // 8-char alphanumeric code (cryptographically random)
+  id         String       @id // 8-char alphanumeric code
   eventId    String?      // Which event this coupon was issued for
-  faceValue  Int          // in paise (₹99 = 9900)
+  faceValue  Int          // in paise (199 = 19900)
   status     CouponStatus @default(ISSUED)
   buyerPhone String
   cashierId  String
@@ -304,19 +298,15 @@ model Coupon {
   @@index([status])
 }
 
-// ─────────────────────────────────────────────
-// AUDIT LOG
-// ─────────────────────────────────────────────
-
 model AuditLog {
   id           String   @id @default(uuid())
   adminId      String
   admin        User     @relation("AdminAuditLogs", fields: [adminId], references: [id])
-  action       String   // e.g. "VIEW_CHOICES", "COMMIT_MATCHING", "PUBLISH_RESULTS"
-  targetUserId String?  // user being acted upon (if applicable)
+  action       String   
+  targetUserId String?  
   eventId      String?
   reason       String?
-  metadata     Json?    // extra structured context
+  metadata     Json?    
   timestamp    DateTime @default(now())
 
   @@index([adminId])

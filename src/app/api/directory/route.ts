@@ -21,9 +21,15 @@ export async function GET(request: NextRequest) {
   }
 
   const event = await getActiveEvent();
-  if (!event || event.status !== "CHOOSING_OPEN" && event.status !== "CHOOSING_CLOSED") {
+  if (!event) {
     return NextResponse.json(
-      { error: "Choosing is not currently open." },
+      { error: "No active event.", eventPhase: null },
+      { status: 403 }
+    );
+  }
+  if (event.status !== "CHOOSING_OPEN" && event.status !== "CHOOSING_CLOSED") {
+    return NextResponse.json(
+      { error: "Choosing is not currently open.", eventPhase: event.status },
       { status: 403 }
     );
   }
@@ -114,6 +120,7 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     participants: enriched,
+    eventPhase: event.status,
     pagination: {
       total,
       page,

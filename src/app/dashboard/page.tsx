@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -41,13 +41,24 @@ export default function DashboardPage() {
         const pData = await profRes.json();
         setFirstName(pData.profile?.firstName || "Guest");
       }
+      // eventPhase is included in BOTH 200 and 403 responses from directory API
       const dirRes = await fetch("/api/directory");
-      if (dirRes.ok) {
-        const dirData = await dirRes.json();
-        setPhase(dirData.eventPhase || "Unknown");
+      const dirData = await dirRes.json();
+      if (dirData.eventPhase) {
+        setPhase(dirData.eventPhase);
+      } else {
+        // Fallback for SUPER_ADMIN via admin event endpoint
+        const adminRes = await fetch("/api/admin/event");
+        if (adminRes.ok) {
+          const adminData = await adminRes.json();
+          setPhase(adminData.event?.status || "Unknown");
+        } else {
+          setPhase("Unknown");
+        }
       }
     } catch (e) {
       console.error(e);
+      setPhase("Unknown");
     }
   };
 
