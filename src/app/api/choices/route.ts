@@ -89,14 +89,7 @@ export async function PUT(request: NextRequest) {
   }
 
   if (!myRegistration.minChoiceExempt && pickedIds.length > 0 && pickedIds.length < 3) {
-    return NextResponse.json({ error: "You must pick at least 3 people unless exempted." }, { status: 400 });
-  }
-  
-  if (!myRegistration.minChoiceExempt && pickedIds.length === 0) {
-    // We allow clearing choices ONLY if exempt? Or if they don't want to participate.
-    // The requirement says: "min 3 choices except for people admin chooses"
-    // So if you submit, you must submit at least 3. If you submit 0, you're clearing them.
-    return NextResponse.json({ error: "You must pick at least 3 people." }, { status: 400 });
+    return NextResponse.json({ error: "You must pick at least 3 people (or clear all)." }, { status: 400 });
   }
 
   // Verify all picks

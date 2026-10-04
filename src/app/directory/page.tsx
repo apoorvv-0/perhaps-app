@@ -244,13 +244,25 @@ export default function DirectoryPage() {
           </div>
 
           {isChoosingOpen && (
-            <button onClick={saveChoices} disabled={saving} className="btn-primary w-full shadow-premium flex items-center justify-center gap-2">
-              {saving ? (
-                 <span className="animate-pulse">Saving...</span>
-              ) : (
-                 <>Lock In Choices</>
+            <div className="flex flex-col gap-3">
+              <button onClick={saveChoices} disabled={saving} className="btn-primary w-full shadow-premium flex items-center justify-center gap-2">
+                {saving ? (
+                   <span className="animate-pulse">Saving...</span>
+                ) : (
+                   <>Lock In Choices</>
+                )}
+              </button>
+              
+              {choices.length > 0 && (
+                <button 
+                  onClick={() => setChoices([])} 
+                  disabled={saving} 
+                  className="w-full py-3 rounded-xl border border-brand-rose/30 text-brand-rose hover:bg-brand-rose/10 transition text-sm font-medium"
+                >
+                  Clear All
+                </button>
               )}
-            </button>
+            </div>
           )}
 
           {error && <p className="text-red-400 text-[13px] mt-4 text-center">{error}</p>}
