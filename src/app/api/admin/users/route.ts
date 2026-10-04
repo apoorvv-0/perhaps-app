@@ -1,24 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession, hasEventRole } from "@/lib/auth/session";
+import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { getActiveEvent } from "@/lib/event-service";
 
-// GET /api/admin/users  — list all registered users for the active event
+// GET /api/admin/users
 export async function GET() {
   const session = await getSession();
-  if (!session) {
+  if (!session || session.globalRole !== "SUPER_ADMIN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  // BUG 3 FIX: SUPER_ADMIN bypasses EventRole check
-  if (session.globalRole !== "SUPER_ADMIN") {
-    const event = await getActiveEvent();
-    if (!event) return NextResponse.json({ users: [] });
-
-    const isAuthorized = await hasEventRole(session.userId, event.id, "ADMIN");
-    if (!isAuthorized) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
   }
 
   const event = await getActiveEvent();
@@ -28,45 +17,65 @@ export async function GET() {
     where: { eventId: event.id },
     include: {
       user: {
-        include: {
-          profile: {
-            select: { firstName: true, lastName: true, college: true, batch: true, gender: true, instagramHandle: true },
-          },
-        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          college: true,
+          batch: true,
+          gender: true,
+          instagramHandle: true,
+          globalRole: true,
+          status: true
+        }
       },
     },
     orderBy: { createdAt: "desc" },
   });
 
-  // Flatten for the frontend
-  const users = registrations.map(r => r.user);
+  // Flatten for frontend
+  const users = registrations.map(r => ({
+    ...r.user,
+    minChoiceExempt: r.minChoiceExempt
+  }));
 
   return NextResponse.json({ users });
 }
 
-// PATCH /api/admin/users  — suspend/activate a user (global action currently, restricted to SUPER_ADMIN)
+// PATCH /api/admin/users
 export async function PATCH(req: NextRequest) {
   const session = await getSession();
   if (!session || session.globalRole !== "SUPER_ADMIN") {
-    return NextResponse.json({ error: "Only super admins can globally suspend users." }, { status: 403 });
+    return NextResponse.json({ error: "Only super admins can modify users." }, { status: 403 });
   }
 
   const body = await req.json();
-  const { userId, status } = body;
-
-  const targetUser = await prisma.user.findUnique({ where: { id: userId } });
-  if (!targetUser) {
-    return NextResponse.json({ error: "User not found." }, { status: 404 });
-  }
+  const { userId, status, minChoiceExempt } = body;
 
   if (userId === session.userId) {
     return NextResponse.json({ error: "You cannot change your own status." }, { status: 403 });
   }
 
-  const updatedUser = await prisma.user.update({
-    where: { id: userId },
-    data: { status },
-  });
+  // Update global status
+  if (status !== undefined) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { status },
+    });
+  }
 
-  return NextResponse.json({ ok: true, user: updatedUser });
+  // Update event-specific exemption
+  if (minChoiceExempt !== undefined) {
+    const event = await getActiveEvent();
+    if (event) {
+      await prisma.eventRegistration.update({
+        where: { eventId_userId: { eventId: event.id, userId } },
+        data: { minChoiceExempt },
+      });
+    }
+  }
+
+  return NextResponse.json({ ok: true });
 }
+
+export const dynamic = "force-dynamic";
