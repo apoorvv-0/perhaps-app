@@ -40,12 +40,12 @@ export async function GET(request: Request) {
 
     if (!profile) {
       // The user hasn't completed their profile on Roviara
-      return NextResponse.redirect(new URL("/login?error=incomplete_profile", request.url));
+      return NextResponse.redirect(new URL("/?error=incomplete_profile", request.url));
     }
 
     // 3. Upsert the user into the local database
     const localUser = await prisma.user.upsert({
-      where: { roviaraId },
+      where: { id: roviaraId },
       update: {
         firstName: profile.firstName,
         lastName: profile.lastName,
@@ -57,7 +57,7 @@ export async function GET(request: Request) {
         status: roviaraData.status
       },
       create: {
-        roviaraId,
+        id: roviaraId,
         firstName: profile.firstName,
         lastName: profile.lastName,
         instagramHandle: profile.instagramHandle,
