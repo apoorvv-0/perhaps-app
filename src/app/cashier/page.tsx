@@ -32,7 +32,7 @@ export default function CashierDashboard() {
   
   // Issue Form State
   const [issuePhone, setIssuePhone] = useState("");
-  const [issueAmount, setIssueAmount] = useState(100);
+  const [issueAmount, setIssueAmount] = useState(1199); // Fixed price
   const [issuing, setIssuing] = useState(false);
   const [issueError, setIssueError] = useState("");
   const [newCouponCode, setNewCouponCode] = useState("");
@@ -193,11 +193,9 @@ export default function CashierDashboard() {
                 <label className="block text-sm font-medium text-[#7a6b6b]">Amount Received (₹)</label>
                 <input
                   type="number"
-                  required
-                  min={1}
+                  readOnly
                   value={issueAmount}
-                  onChange={(e) => setIssueAmount(Number(e.target.value))}
-                  className="mt-1 block w-full rounded-md border-[#2a2a2a] focus:border-brand-accent focus:ring-brand-accent sm:text-sm p-2 border"
+                  className="mt-1 block w-full rounded-md border-[#2a2a2a] bg-[#1a1a1a] text-[#7a6b6b] sm:text-sm p-2 border cursor-not-allowed"
                 />
               </div>
 

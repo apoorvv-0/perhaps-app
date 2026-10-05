@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
   const redeemResult = await redeemCoupon({
     code: couponCode,
     redeemedByUserId: userId,
+    requiredPaise: 1199 * 100, // Fixed price
   });
 
   if (!redeemResult.ok) {

@@ -8,7 +8,14 @@ export default function AdminUsersPage() {
   const { session, isLoading } = useAuth();
   const router = useRouter();
   const [users, setUsers] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
   const [saving, setSaving] = useState<string | null>(null);
+
+  const filteredUsers = users.filter(u => 
+    `${u.firstName} ${u.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
+    u.college?.toLowerCase().includes(search.toLowerCase()) ||
+    u.globalRole?.toLowerCase().includes(search.toLowerCase())
+  );
 
   useEffect(() => {
     if (!isLoading) {
@@ -51,7 +58,16 @@ export default function AdminUsersPage() {
     <div className="min-h-screen bg-[#2B0609] text-[#F9F0EE] p-6 font-inter">
       <div className="max-w-4xl mx-auto">
         <button onClick={() => router.push('/admin')} className="text-[#A3918D] hover:text-[#F9F0EE] mb-6 transition">&larr; Back to Admin</button>
-        <h1 className="font-playfair text-3xl mb-8">Team & User Management</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+          <h1 className="font-playfair text-3xl">Team & User Management</h1>
+          <input 
+            type="text" 
+            placeholder="Search name, college, or role..." 
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="bg-[#4A1519] text-[#F9F0EE] px-4 py-2 rounded-lg border border-[#6b2327] outline-none focus:border-[#E08F83] w-full sm:w-64"
+          />
+        </div>
         
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -65,7 +81,7 @@ export default function AdminUsersPage() {
               </tr>
             </thead>
             <tbody>
-              {users.map(u => {
+              {filteredUsers.map(u => {
                 const isCashier = u.eventRoles?.includes('CASHIER');
                 return (
                   <tr key={u.id} className="border-b border-[#4A1519] hover:bg-[#3d0f12] transition">

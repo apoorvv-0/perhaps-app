@@ -33,9 +33,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // ── Event Staff routes (Admin/Cashier) — SUPER_ADMIN only ────
+  // ── Event Staff routes (Admin/Cashier) ───────────────────────
+  // Middleware only checks for valid session. The actual routes/pages
+  // hit the DB to verify EventRole or SUPER_ADMIN.
   if (pathname.startsWith("/admin") || pathname.startsWith("/cashier")) {
-    if (!session || session.globalRole !== "SUPER_ADMIN") {
+    if (!session) {
       return NextResponse.redirect(new URL("/", request.url));
     }
     return NextResponse.next();
