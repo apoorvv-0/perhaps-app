@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import Link from "next/link";
 import BottomTabBar from "@/components/BottomTabBar";
+import { motion, AnimatePresence } from "framer-motion";
 
 function CountdownTimer({ endTime }: { endTime: number }) {
   const [timeLeft, setTimeLeft] = useState(endTime - Date.now());
@@ -52,6 +53,8 @@ export default function Dashboard() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [endTime, setEndTime] = useState<number | null>(null);
   const [registering, setRegistering] = useState(false);
+  const [showLore, setShowLore] = useState(false);
+  const [loreStep, setLoreStep] = useState(0);
 
   useEffect(() => {
     if (!isLoading) {
@@ -60,9 +63,17 @@ export default function Dashboard() {
       else if (!session.profileComplete) router.push("/profile");
       else {
         fetchStatus();
+        if (localStorage.getItem("perhaps_lore_seen") !== "true") {
+          setShowLore(true);
+        }
       }
     }
   }, [session, isLoading, router]);
+
+  const dismissLore = () => {
+    localStorage.setItem("perhaps_lore_seen", "true");
+    setShowLore(false);
+  };
 
   const fetchStatus = async () => {
     try {
@@ -257,6 +268,67 @@ export default function Dashboard() {
         )}
 
       </div>
+
+      <AnimatePresence>
+        {showLore && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-50 bg-brand-wine/95 backdrop-blur-2xl flex flex-col items-center justify-center p-8 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
+            
+            <AnimatePresence mode="wait">
+              {loreStep === 0 && (
+                <motion.div key="step1" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center relative z-10 w-full max-w-sm">
+                  <div className="w-16 h-16 rounded-full border border-brand-burgundy/50 flex items-center justify-center mx-auto mb-8 bg-brand-charcoal/50">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E8B4A5" strokeWidth="1.5"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                  </div>
+                  <h2 className="font-playfair text-3xl font-normal text-brand-blush mb-4 italic">The Oracle</h2>
+                  <p className="text-brand-taupe/80 text-sm leading-relaxed font-light mb-12">
+                    Welcome to Season 2. The Oracle computes the unseen connections between you and your peers. 
+                    No one knows who you choose, unless the feeling is mutual.
+                  </p>
+                  <button onClick={() => setLoreStep(1)} className="w-full py-4 bg-brand-blush text-brand-wine font-bold rounded-full uppercase tracking-widest text-xs">Proceed</button>
+                </motion.div>
+              )}
+              {loreStep === 1 && (
+                <motion.div key="step2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center relative z-10 w-full max-w-sm">
+                  <div className="w-16 h-16 rounded-full border border-brand-burgundy/50 flex items-center justify-center mx-auto mb-8 bg-brand-charcoal/50">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E8B4A5" strokeWidth="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                  </div>
+                  <h2 className="font-playfair text-3xl font-normal text-brand-blush mb-4 italic">The Rules</h2>
+                  <p className="text-brand-taupe/80 text-sm leading-relaxed font-light mb-12">
+                    You have <strong className="text-brand-rose">3 free slots</strong> to submit the names of those you desire.
+                    If you need more, the Cashier can grant you extra slots.
+                    Choose wisely.
+                  </p>
+                  <button onClick={() => setLoreStep(2)} className="w-full py-4 bg-brand-blush text-brand-wine font-bold rounded-full uppercase tracking-widest text-xs">Acknowledge</button>
+                </motion.div>
+              )}
+              {loreStep === 2 && (
+                <motion.div key="step3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center relative z-10 w-full max-w-sm">
+                  <div className="w-16 h-16 rounded-full border border-brand-burgundy/50 flex items-center justify-center mx-auto mb-8 bg-brand-charcoal/50">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E8B4A5" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                  </div>
+                  <h2 className="font-playfair text-3xl font-normal text-brand-blush mb-4 italic">The Reveal</h2>
+                  <p className="text-brand-taupe/80 text-sm leading-relaxed font-light mb-12">
+                    If a match is found, their identity remains locked. Only those who possess the decryption code can unveil their partner's true identity.
+                  </p>
+                  <button onClick={dismissLore} className="w-full py-4 bg-brand-rose text-brand-wine font-bold rounded-full uppercase tracking-widest text-xs shadow-[0_0_30px_rgba(232,180,165,0.3)]">Enter The Pool</button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            <div className="flex gap-2 mt-12 relative z-10">
+              <div className={`w-1.5 h-1.5 rounded-full transition-colors ${loreStep === 0 ? 'bg-brand-rose' : 'bg-brand-taupe/30'}`} />
+              <div className={`w-1.5 h-1.5 rounded-full transition-colors ${loreStep === 1 ? 'bg-brand-rose' : 'bg-brand-taupe/30'}`} />
+              <div className={`w-1.5 h-1.5 rounded-full transition-colors ${loreStep === 2 ? 'bg-brand-rose' : 'bg-brand-taupe/30'}`} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <BottomTabBar />
     </div>

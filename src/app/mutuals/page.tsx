@@ -28,12 +28,6 @@ export default function MutualsRouter() {
 
   if (isLoading || phase === "LOADING") return <div className="min-h-screen bg-brand-wine" />;
 
-  // If results are open, show results!
-  if (phase === "RESULTS_OPEN") {
-    return <ResultsPage />;
-  }
-
-  // Otherwise (registration, choosing, matching), show the directory
-  // The directory page already handles showing "Directory Locked" if it's not CHOOSING_OPEN
+  // The directory page already handles showing read-only choices when results are open
   return <DirectoryPage />;
 }
