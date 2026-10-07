@@ -59,7 +59,6 @@ export default function Dashboard() {
       else if (!session.phoneVerified) router.push("/verify-phone");
       else if (!session.profileComplete) router.push("/profile");
       else {
-        setFirstName(session.firstName || "");
         fetchStatus();
       }
     }
@@ -67,14 +66,14 @@ export default function Dashboard() {
 
   const fetchStatus = async () => {
     try {
-      const [statusRes, meRes] = await Promise.all([
+      const [statusRes, profileRes] = await Promise.all([
         fetch("/api/event/status"),
-        fetch("/api/auth/me")
+        fetch("/api/profile")
       ]);
       
-      if (meRes.ok) {
-        const d = await meRes.json();
-        setFirstName(d.session?.firstName || "");
+      if (profileRes.ok) {
+        const d = await profileRes.json();
+        setFirstName(d.profile?.firstName || "");
       }
       if (statusRes.ok) {
         const s = await statusRes.json();
