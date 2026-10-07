@@ -45,7 +45,7 @@ const PHASE_LABELS: Record<string, { label: string; title: string; sub: string; 
 };
 
 export default function Dashboard() {
-  const { session, isLoading } = useAuth();
+  const { session, isLoading, logout } = useAuth();
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [phase, setPhase] = useState("LOADING");
@@ -56,7 +56,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!isLoading) {
       if (!session) router.push("/");
-      else if (!session.phoneVerified) router.push("/verify-phone");
+      else if (!session.phoneVerified) window.location.href = (process.env.NEXT_PUBLIC_ROVIARA_URL || "https://roviara-web.vercel.app") + "/phone";
       else if (!session.profileComplete) router.push("/profile");
       else {
         fetchStatus();
@@ -123,7 +123,7 @@ export default function Dashboard() {
       {/* Top Bar */}
       <div className="relative z-10 w-full max-w-lg mx-auto px-8 pt-12 pb-8 flex items-center justify-between">
         <h1 className="font-playfair text-2xl font-bold tracking-widest uppercase text-brand-taupe/80">Perhaps</h1>
-        <button className="w-12 h-12 rounded-full bg-brand-charcoal/40 backdrop-blur-sm flex items-center justify-center border border-brand-burgundy/50 text-brand-blush hover:bg-brand-charcoal/80 transition-colors">
+        <button onClick={logout} className="w-12 h-12 rounded-full bg-brand-charcoal/40 backdrop-blur-sm flex items-center justify-center border border-brand-burgundy/50 text-brand-blush hover:bg-brand-charcoal/80 transition-colors">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>
           </svg>
