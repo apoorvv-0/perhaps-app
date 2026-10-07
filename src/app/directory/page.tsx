@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
+import Link from "next/link";
 import BottomTabBar from "@/components/BottomTabBar";
 import LoadingScreen from "@/components/LoadingScreen";
 import { motion, AnimatePresence } from "framer-motion";
@@ -188,6 +189,16 @@ export default function DirectoryPage() {
         <p className="text-brand-taupe text-center text-sm mb-8 font-light">
           {isChoosing ? "Find someone worth the maybe. If you have multiple mutuals, you will only be matched with your strongest mutual connection." : "Your choices are currently locked."}
         </p>
+
+        {/* Results CTA */}
+        {(phase === "RESULTS_OPEN" || phase === "CLOSED") && (
+          <div className="mb-6">
+            <Link href="/results" className="flex items-center justify-center gap-2 w-full py-4 rounded-[20px] font-bold text-brand-charcoal bg-brand-rose shadow-[0_8px_30px_-10px_rgba(232,180,165,0.4)] transition-transform active:scale-[0.98]">
+              View Your Match
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+            </Link>
+          </div>
+        )}
 
         {/* Search Bar - Premium Pill */}
         <div className="relative w-full mb-5">
