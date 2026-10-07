@@ -22,6 +22,7 @@ export default function VerifyPhone() {
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [cooldown, setCooldown] = useState(0);
   
   const confirmationResult = useRef<ConfirmationResult | null>(null);
 
@@ -36,27 +37,55 @@ export default function VerifyPhone() {
   }, [session, isLoading, router]);
 
   useEffect(() => {
-    // Initialize reCAPTCHA
-    if (typeof window !== "undefined" && !window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-        size: "invisible",
-      });
+    // Cooldown timer logic
+    if (cooldown > 0) {
+      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+      return () => clearTimeout(timer);
     }
-  }, []);
+  }, [cooldown]);
+
+  const initRecaptcha = () => {
+    if (typeof window !== "undefined" && !window.recaptchaVerifier) {
+      try {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+          size: "invisible",
+        });
+      } catch (e) {
+        console.error("Recaptcha Init Error", e);
+      }
+    }
+    return window.recaptchaVerifier;
+  };
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (cooldown > 0) return;
+    
     setError("");
     setLoading(true);
     
     try {
-      const appVerifier = window.recaptchaVerifier;
+      const appVerifier = initRecaptcha();
       const result = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
       confirmationResult.current = result;
       setStep("otp");
+      setCooldown(60); // 60 seconds rate limit
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Failed to send OTP. Please check the phone number format.");
+      
+      // Reset reCAPTCHA if it failed so they can try again
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+      
+      if (err.code === "auth/too-many-requests") {
+        setError("Too many attempts. Google has temporarily blocked this device. Please wait a few minutes.");
+      } else if (err.code === "auth/invalid-phone-number") {
+        setError("Invalid phone number format. Please ensure it starts with +91.");
+      } else {
+        setError(err.message || "Failed to send OTP. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -125,10 +154,10 @@ export default function VerifyPhone() {
             />
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || cooldown > 0}
               className="w-full py-4 mt-2 bg-brand-blush text-brand-wine font-bold rounded-[16px] uppercase tracking-widest text-xs shadow-[0_4px_14px_rgba(232,180,165,0.25)] hover:bg-brand-rose transition-colors disabled:opacity-50"
             >
-              {loading ? "Sending..." : "Send OTP"}
+              {loading ? "Sending..." : cooldown > 0 ? `Try again in ${cooldown}s` : "Send OTP"}
             </button>
           </form>
         ) : (
