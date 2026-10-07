@@ -27,7 +27,7 @@ export default function PerhapsProfilePage() {
     if (!isLoading) {
       if (!session) { router.push("/"); return; }
       if (!session.phoneVerified) {
-        window.location.href = (process.env.NEXT_PUBLIC_ROVIARA_URL || "https://roviara-web.vercel.app") + "/phone";
+        router.push("/verify-phone");
         return;
       }
       fetch("/api/profile").then(r => r.json()).then(data => {

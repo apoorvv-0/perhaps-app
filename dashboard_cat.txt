@@ -1,0 +1,36 @@
+Created At: 2026-10-07T13:32:35+05:30
+Completed At: 2026-10-07T13:32:37+05:30
+
+The command exited with code 0.
+Output:
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!session) router.push("/");
+      else fetchData();
+    }
+  }, [session, isLoading, router]);
+
+  const fetchData = async () => {
+    try {
+      const [profRes, adminRes] = await Promise.all([
+        fetch("/api/profile"),
+        fetch("/api/admin/event"),
+      ]);
+      if (profRes.ok) {
+        const p = await profRes.json();
+        setFirstName(p.profile?.firstName || "");
+      }
+      if (adminRes.ok) {
+        const a = await adminRes.json();
+        const status = a.event?.status || "UNKNOWN";
+        setPhase(status);
+        if (a.event?.registrationEndAt && status === "REGISTRATION_OPEN") {
+          setEndTime(new Date(a.event.registrationEndAt).getTime());
+        }
+      } else {
+        const dirRes = await fetch("/api/directory");
+        const d = await dirRes.json();
+        setPhase(d.eventPhase || "UNKNOWN");
+      }
+

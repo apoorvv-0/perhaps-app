@@ -64,6 +64,9 @@ model User {
   college         String
   batch           String
   
+  phone           String?
+  phoneVerified   Boolean    @default(false)
+  
   globalRole      GlobalRole @default(USER)
   status          UserStatus @default(ACTIVE)
   createdAt       DateTime   @default(now())

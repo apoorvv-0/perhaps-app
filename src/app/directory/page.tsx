@@ -41,7 +41,7 @@ export default function DirectoryPage() {
   useEffect(() => {
     if (!isLoading) {
       if (!session) { router.push("/"); return; }
-      if (!session.phoneVerified) { window.location.href = (process.env.NEXT_PUBLIC_ROVIARA_URL || "https://roviara-web.vercel.app") + "/phone"; return; }
+      if (!session.phoneVerified) { router.push("/verify-phone"); return; }
       if (!session.profileComplete) { router.push("/profile"); return; }
       fetchData();
     }

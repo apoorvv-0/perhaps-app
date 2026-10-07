@@ -74,7 +74,7 @@ export async function GET(request: Request) {
     await setSessionCookie({
       userId: localUser.id,
       globalRole: localUser.globalRole as any,
-      phoneVerified: true,
+      phoneVerified: localUser.phoneVerified,
       profileComplete: true
     });
 

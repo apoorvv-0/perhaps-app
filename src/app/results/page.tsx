@@ -31,7 +31,7 @@ export default function ResultsPage() {
   useEffect(() => {
     if (!isLoading) {
       if (!session) router.push("/");
-      else if (!session.phoneVerified) window.location.href = (process.env.NEXT_PUBLIC_ROVIARA_URL || "https://roviara-web.vercel.app") + "/phone";
+      else if (!session.phoneVerified) router.push("/verify-phone");
       else if (!session.profileComplete) router.push("/profile");
       else fetchResult();
     }
