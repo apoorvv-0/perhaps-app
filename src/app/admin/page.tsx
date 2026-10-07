@@ -228,7 +228,11 @@ export default function AdminDashboardPage() {
              if (confirm("Commit matches permanently? This cannot be undone and will move phase to MATCHING.")) {
                setActionLoading(true);
                try {
-                 const r = await fetch("/api/admin/matching/commit", { method: "POST" });
+                 const r = await fetch("/api/admin/matching/commit", { 
+                   method: "POST",
+                   headers: { "Content-Type": "application/json" },
+                   body: JSON.stringify({ confirmation: "COMMIT MATCHING" })
+                 });
                  const text = await r.text();
                  let d;
                  try { d = JSON.parse(text); } catch { throw new Error("Invalid response"); }
