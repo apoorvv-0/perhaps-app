@@ -1,203 +1,208 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
+import LoadingScreen from "@/components/LoadingScreen";
 import BottomTabBar from "@/components/BottomTabBar";
 
-const COLLEGES = ['Dr. Balasaheb Vikhe Patil Rural Medical College, Loni'];
-
-const BATCHES = [
-  "2020", "2021", "2022", "2023", "2024", "Intern", "Other"
-];
-
-export default function ProfileSetupPage() {
-  const { session, isLoading, refreshSession } = useAuth();
+export default function PerhapsProfilePage() {
+  const { session, isLoading, refreshSession, logout } = useAuth();
   const router = useRouter();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [gender, setGender] = useState<"MALE" | "FEMALE" | "">("");
+  const [gender, setGender] = useState("");
   const [college, setCollege] = useState("");
   const [batch, setBatch] = useState("");
   const [instagram, setInstagram] = useState("");
+
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [initialFetchDone, setInitialFetchDone] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
 
   useEffect(() => {
     if (!isLoading) {
-      if (!session) {
-        router.push("/");
-      } else if (!session.phoneVerified) {
-        router.push("/verify-phone");
-      } else if (session.profileComplete && !initialFetchDone) {
-        fetch("/api/profile")
-          .then(r => r.json())
-          .then(data => {
-            if (data.profile) {
-              setFirstName(data.profile.firstName);
-              setLastName(data.profile.lastName);
-              setGender(data.profile.gender);
-              setCollege(data.profile.college);
-              setBatch(data.profile.batch);
-              setInstagram(data.profile.instagramHandle);
-              setIsEditMode(true);
-            }
-            setInitialFetchDone(true);
-          })
-          .catch(() => { setInitialFetchDone(true); });
-      } else if (!session.profileComplete) {
-        setInitialFetchDone(true);
+      if (!session) { router.push("/"); return; }
+      if (!session.phoneVerified) {
+        window.location.href = (process.env.NEXT_PUBLIC_ROVIARA_URL || "https://roviara-web.vercel.app") + "/phone";
+        return;
       }
+      fetch("/api/profile").then(r => r.json()).then(data => {
+        if (data.profile) {
+          setFirstName(data.profile.firstName || "");
+          setLastName(data.profile.lastName || "");
+          setGender(data.profile.gender || "");
+          setCollege(data.profile.college || "");
+          setBatch(data.profile.batch || "");
+          setInstagram(data.profile.instagramHandle || "");
+          
+          if (data.profile.firstName && data.profile.firstName !== "New") {
+            setIsLocked(true);
+          }
+        }
+        setReady(true);
+      });
     }
-  }, [session, isLoading, router, initialFetchDone]);
+  }, [isLoading, session, router]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    let cleanInsta = instagram.trim();
-    if (cleanInsta.startsWith("@")) {
-      cleanInsta = cleanInsta.replace(/^@+/, '');
-    }
-
+  const handleSave = async () => {
+    setError(""); setSuccess(""); setLoading(true);
     try {
       const res = await fetch("/api/profile", {
-        method: "PUT",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firstName: firstName.trim(),
-          lastName: lastName.trim(),
-          gender,
-          college,
-          batch,
-          instagramHandle: cleanInsta
-        }),
+        body: JSON.stringify({ firstName, lastName, gender, college, batch, instagramHandle: instagram }),
       });
       const data = await res.json();
-
-      if (res.ok) {
-        await refreshSession();
-        router.push("/dashboard");
-      } else {
-        if (data.error && typeof data.error === "object") {
-          setError(JSON.stringify(data.error));
-        } else {
-          setError(data.error || "Failed to update profile");
-        }
-      }
-    } catch {
-      setError("Network error");
+      if (!res.ok) throw new Error(data.error || "Failed to save");
+      setSuccess("Profile updated.");
+      await refreshSession();
+    } catch (e: any) {
+      setError(e.message);
     } finally {
       setLoading(false);
     }
   };
 
-  if (isLoading || !session || !initialFetchDone) return <div className="min-h-screen bg-brand-wine" />;
+  if (!ready || isLoading || !session) return <LoadingScreen />;
 
   return (
-    <div className="min-h-screen bg-brand-wine font-inter relative pb-32">
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-burgundy/40 via-brand-wine/0 to-brand-wine/0" />
+    <div className="min-h-screen bg-brand-wine text-brand-blush font-inter pb-36 selection:bg-brand-burgundy selection:text-brand-blush">
 
-      <div className="relative z-10 max-w-lg mx-auto px-6 pt-12 pb-6">
-        
-        {isEditMode && (
-          <button onClick={() => router.push("/dashboard")} className="text-brand-taupe hover:text-brand-blush text-sm flex items-center gap-2 mb-8 transition-colors">
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
-            Dashboard
-          </button>
+      {/* Header */}
+      <div className="flex items-center justify-between px-8 pt-16 pb-2">
+        <h1 className="font-playfair text-3xl font-bold italic tracking-tight">Profile</h1>
+        <button
+          onClick={logout}
+          className="text-brand-taupe text-sm font-medium hover:text-brand-blush transition-colors tracking-wide"
+        >
+          Sign Out
+        </button>
+      </div>
+
+      <div className="px-8 mt-8 max-w-lg mx-auto space-y-5">
+
+        {/* Feedback */}
+        {error && (
+          <div className="p-5 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm leading-relaxed">
+            {error}
+          </div>
         )}
-
-        <h1 className="font-playfair text-[32px] text-brand-blush mb-2">
-          {isEditMode ? "Edit Profile" : "Complete Profile"}
-        </h1>
-        <p className="text-brand-taupe text-sm mb-8">
-          {isEditMode ? "Update your personal details below." : "Just a few details before you can start matching."}
-        </p>
-
-        <div className="charcoal-card p-6 sm:p-8">
-          {error && (
-            <div className="text-sm text-red-300 bg-red-950/30 px-4 py-3 rounded-xl border border-red-900/50 mb-6">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[11px] font-bold text-brand-taupe uppercase tracking-widest mb-2">First Name</label>
-                <input type="text" required value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-full bg-[#111] border border-brand-rose/10 text-brand-blush px-4 py-3 rounded-xl outline-none focus:border-brand-rose transition-colors" />
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold text-brand-taupe uppercase tracking-widest mb-2">Last Name</label>
-                <input type="text" required value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full bg-[#111] border border-brand-rose/10 text-brand-blush px-4 py-3 rounded-xl outline-none focus:border-brand-rose transition-colors" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-brand-taupe uppercase tracking-widest mb-2">Gender</label>
-              <select required value={gender} onChange={(e: any) => setGender(e.target.value)} disabled={isEditMode} className="w-full bg-[#111] border border-brand-rose/10 text-brand-blush px-4 py-3 rounded-xl outline-none focus:border-brand-rose transition-colors disabled:opacity-50 appearance-none">
-                <option value="" disabled>Select Gender...</option>
-                <option value="MALE">Male</option>
-                <option value="FEMALE">Female</option>
-              </select>
-              {isEditMode && <p className="text-[11px] text-brand-taupe mt-1">Gender cannot be changed once set.</p>}
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-brand-taupe uppercase tracking-widest mb-2">College</label>
-              <select required value={college} onChange={(e) => setCollege(e.target.value)} disabled={isEditMode} className="w-full bg-[#111] border border-brand-rose/10 text-brand-blush px-4 py-3 rounded-xl outline-none focus:border-brand-rose transition-colors disabled:opacity-50 appearance-none">
-                <option value="" disabled>Select College...</option>
-                {COLLEGES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-              {isEditMode && <p className="text-[11px] text-brand-taupe mt-1">College cannot be changed once set.</p>}
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-brand-taupe uppercase tracking-widest mb-2">Batch / Year</label>
-              <select required value={batch} onChange={(e) => setBatch(e.target.value)} className="w-full bg-[#111] border border-brand-rose/10 text-brand-blush px-4 py-3 rounded-xl outline-none focus:border-brand-rose transition-colors appearance-none">
-                <option value="" disabled>Select Batch...</option>
-                {BATCHES.map(b => <option key={b} value={b}>{b}</option>)}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-brand-taupe uppercase tracking-widest mb-2">Instagram Handle</label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-taupe">@</span>
-                <input type="text" required value={instagram} onChange={(e) => setInstagram(e.target.value)} className="w-full bg-[#111] border border-brand-rose/10 text-brand-blush pl-9 pr-4 py-3 rounded-xl outline-none focus:border-brand-rose transition-colors" />
-              </div>
-              <p className="text-[11px] text-brand-taupe mt-1">Only revealed to mutual matches.</p>
-            </div>
-
-            <button type="submit" disabled={loading} className="btn-primary w-full mt-4 flex items-center justify-center">
-              {loading ? <span className="animate-pulse">Saving...</span> : <>{isEditMode ? "Save Changes" : "Register for Perhaps"}</>}
-            </button>
-          </form>
-        </div>
-
-        {isEditMode && (
-          <div className="mt-12 pt-8 border-t border-brand-rose/10 text-center">
-            <p className="text-brand-taupe text-xs mb-3">Data & Privacy</p>
-            <button 
-              onClick={() => {
-                if (confirm('This will permanently delete your account and all data. This cannot be undone.')) {
-                  fetch('/api/profile', { method: 'DELETE' }).then(() => { window.location.href = '/'; });
-                }
-              }}
-              className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
-            >
-              Delete Account
-            </button>
+        {success && (
+          <div className="p-5 rounded-2xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm leading-relaxed">
+            {success}
           </div>
         )}
 
+        {/* Name Row */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="block text-[11px] font-bold text-brand-taupe uppercase tracking-widest ml-1">
+              First Name
+            </label>
+            <input
+              value={firstName}
+              onChange={e => setFirstName(e.target.value)}
+              disabled={isLocked}
+              placeholder="Priya"
+              className="w-full bg-brand-charcoal rounded-2xl px-5 py-4 text-brand-blush text-sm outline-none focus:ring-2 focus:ring-brand-rose/20 transition-all disabled:opacity-60"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-[11px] font-bold text-brand-taupe uppercase tracking-widest ml-1">
+              Last Name
+            </label>
+            <input
+              value={lastName}
+              onChange={e => setLastName(e.target.value)}
+              disabled={isLocked}
+              placeholder="Sharma"
+              className="w-full bg-brand-charcoal rounded-2xl px-5 py-4 text-brand-blush text-sm outline-none focus:ring-2 focus:ring-brand-rose/20 transition-all disabled:opacity-60"
+            />
+          </div>
+        </div>
+
+        {/* Gender */}
+        <div className="space-y-2">
+          <label className="block text-[11px] font-bold text-brand-taupe uppercase tracking-widest ml-1">
+            Gender
+          </label>
+          <select
+            value={gender}
+            onChange={e => setGender(e.target.value)}
+            disabled={isLocked}
+            className="w-full bg-brand-charcoal rounded-2xl px-5 py-4 text-brand-blush text-sm outline-none focus:ring-2 focus:ring-brand-rose/20 transition-all appearance-none disabled:opacity-60"
+          >
+            <option value="" disabled>Select your gender</option>
+            <option value="MALE">Male</option>
+            <option value="FEMALE">Female</option>
+          </select>
+        </div>
+
+        {/* College */}
+        <div className="space-y-2">
+          <label className="block text-[11px] font-bold text-brand-taupe uppercase tracking-widest ml-1">
+            College
+          </label>
+          <input
+            value={college}
+            onChange={e => setCollege(e.target.value)}
+            disabled={isLocked}
+            placeholder="Symbiosis"
+            className="w-full bg-brand-charcoal rounded-2xl px-5 py-4 text-brand-blush text-sm outline-none focus:ring-2 focus:ring-brand-rose/20 transition-all disabled:opacity-60"
+          />
+        </div>
+
+        {/* Batch */}
+        <div className="space-y-2">
+          <label className="block text-[11px] font-bold text-brand-taupe uppercase tracking-widest ml-1">
+            Batch (Year of Graduation)
+          </label>
+          <input
+            value={batch}
+            onChange={e => setBatch(e.target.value)}
+            disabled={isLocked}
+            placeholder="2026"
+            className="w-full bg-brand-charcoal rounded-2xl px-5 py-4 text-brand-blush text-sm outline-none focus:ring-2 focus:ring-brand-rose/20 transition-all disabled:opacity-60"
+          />
+        </div>
+
+        {/* Instagram */}
+        <div className="space-y-2">
+          <label className="block text-[11px] font-bold text-brand-taupe uppercase tracking-widest ml-1">
+            Instagram Handle
+          </label>
+          <div className="relative">
+            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-taupe text-sm select-none">@</span>
+            <input
+              value={instagram}
+              onChange={e => setInstagram(e.target.value)}
+              placeholder="priya.sharma"
+              className="w-full bg-brand-charcoal rounded-2xl pl-10 pr-5 py-4 text-brand-blush text-sm outline-none focus:ring-2 focus:ring-brand-rose/20 transition-all"
+            />
+          </div>
+          <p className="text-[11px] text-brand-taupe/60 ml-1 leading-relaxed">
+            Used to verify your identity and connect you with your matches.
+          </p>
+        </div>
+
+        {/* Save */}
+        <div className="pt-4">
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="w-full py-5 rounded-full font-semibold text-brand-charcoal bg-gradient-to-r from-brand-blush to-brand-rose active:scale-[0.98] transition-all text-base tracking-wide disabled:opacity-60"
+          >
+            {loading ? "Saving..." : "Save Identity"}
+          </button>
+        </div>
+
       </div>
-      {isEditMode && <BottomTabBar />}
+
+      <BottomTabBar />
     </div>
   );
 }

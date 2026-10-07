@@ -41,8 +41,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
-    setSession(null);
-    window.location.href = "/";
+    const roviaraUrl = process.env.NEXT_PUBLIC_ROVIARA_URL || 'https://roviara-web.vercel.app';
+    window.location.href = `${roviaraUrl}/api/auth/logout?redirect=` + encodeURIComponent(window.location.origin);
   };
 
   useEffect(() => {

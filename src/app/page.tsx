@@ -1,50 +1,112 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import LoadingScreen from "@/components/LoadingScreen";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 
-export default function PerhapsLanding() {
+export default function PerhapsLandingPage() {
   const { session, isLoading } = useAuth();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
 
-  // If already logged in, go to dashboard
   useEffect(() => {
+    setMounted(true);
     if (!isLoading && session) {
-      router.push('/dashboard');
+      router.push("/dashboard");
     }
   }, [session, isLoading, router]);
 
-  if (isLoading || session) return <div style={{ minHeight: '100vh', background: '#2B0609' }} />;
-
   const handleLogin = () => {
-    // Redirect to Roviara Hub for SSO
-    const roviaraUrl = process.env.NEXT_PUBLIC_ROVIARA_URL || "http://localhost:3001";
-    // Send a redirect parameter so Roviara knows where to send them back
+    const roviaraUrl = process.env.NEXT_PUBLIC_ROVIARA_URL || "https://roviara-web.vercel.app";
     const redirectUrl = encodeURIComponent(`${window.location.origin}/api/auth/callback`);
     window.location.href = `${roviaraUrl}/login?redirect=${redirectUrl}`;
   };
 
+  const handleSignUp = () => {
+    const roviaraUrl = process.env.NEXT_PUBLIC_ROVIARA_URL || "https://roviara-web.vercel.app";
+    const redirectUrl = encodeURIComponent(`${window.location.origin}/api/auth/callback`);
+    window.location.href = `${roviaraUrl}/signup?redirect=${redirectUrl}`;
+  };
+
+  if (isLoading || session) {
+    return <LoadingScreen />;
+  }
+
   return (
-    <main className="min-h-screen bg-brand-wine text-brand-blush font-inter flex flex-col relative overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-brand-burgundy/40 via-brand-wine/0 to-brand-wine/0" />
+    <div className="min-h-screen w-full bg-brand-wine text-brand-blush font-inter relative overflow-hidden flex flex-col justify-between selection:bg-brand-burgundy selection:text-brand-blush">
+      
+      {/* Background ambient lighting */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-burgundy/25 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-0 w-full h-[40vh] bg-gradient-to-t from-brand-wine-dark/80 via-brand-burgundy/10 to-transparent pointer-events-none" />
 
-      <div className="flex-1 flex flex-col items-center justify-center px-6 text-center relative z-10 w-full max-w-md mx-auto">
-        <h1 className="text-5xl font-playfair font-bold mb-4 tracking-wide text-brand-blush">
-          Perhaps
-        </h1>
-        
-        <p className="text-lg text-brand-blush/80 mb-12 font-light">
-          Find your mutuals, discover compatibility.
-        </p>
-
-        <button
-          onClick={handleLogin}
-          className="w-full btn-primary font-semibold py-4"
+      {/* Top Header */}
+      <header className="w-full max-w-md mx-auto px-8 pt-14 flex justify-end relative z-10">
+        <button 
+          onClick={handleLogin} 
+          className="text-brand-rose/80 text-sm font-medium hover:text-brand-blush transition-colors tracking-wide py-2 px-4 rounded-full border border-brand-rose/15 hover:border-brand-rose/40 bg-brand-charcoal/30 backdrop-blur-sm"
         >
-          Log in with Roviara
+          Log In
         </button>
-      </div>
-    </main>
+      </header>
+
+      {/* Center Content: Exact Brand Logo & Tagline */}
+      <main className={`flex-1 flex flex-col items-center justify-center text-center px-8 relative z-10 transition-all duration-1000 transform ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+        
+        {/* Glow Behind Logo */}
+        <div className="relative mb-6">
+          <div className="absolute -inset-4 bg-brand-rose/10 rounded-full blur-2xl pointer-events-none" />
+          <Image
+            src="/brand-logo.png"
+            alt="Perhaps"
+            width={324}
+            height={130}
+            priority
+            className="w-64 sm:w-72 h-auto mx-auto object-contain drop-shadow-[0_4px_24px_rgba(232,180,165,0.35)]"
+          />
+        </div>
+
+        {/* Tagline matching the brand spec */}
+        <h2 className="font-playfair text-2xl sm:text-3xl font-normal text-brand-blush/90 leading-relaxed mt-2 tracking-wide">
+          Meet someone <br />
+          <span className="italic font-medium text-brand-rose">worth the maybe.</span>
+        </h2>
+        
+        <p className="text-xs sm:text-sm text-brand-taupe mt-4 max-w-[260px] leading-relaxed font-light">
+          Discreet, intentional mutual matching for verified college students.
+        </p>
+      </main>
+
+      {/* Bottom CTA & Controls */}
+      <footer className={`w-full max-w-md mx-auto px-8 pb-14 flex flex-col items-center relative z-10 gap-5 transition-all duration-1000 delay-200 transform ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+        
+        {/* Primary CTA */}
+        <button 
+          onClick={handleSignUp} 
+          className="w-full py-5 rounded-full font-inter font-semibold text-brand-charcoal bg-gradient-to-r from-brand-blush to-brand-rose active:scale-[0.98] transition-all text-base tracking-wide shadow-[0_8px_32px_rgba(232,180,165,0.25)] hover:shadow-[0_8px_40px_rgba(232,180,165,0.4)] hover:scale-[1.01]"
+        >
+          Get Started
+        </button>
+
+        {/* Secondary Login Link */}
+        <div className="flex items-center gap-1.5 text-xs text-brand-taupe">
+          <span>Already have a Roviara ID?</span>
+          <button 
+            onClick={handleLogin} 
+            className="text-brand-rose font-medium hover:underline transition-colors"
+          >
+            Log In
+          </button>
+        </div>
+
+        {/* Pagination Dots from Brand Spec */}
+        <div className="flex items-center gap-2 pt-2">
+          <div className="w-2 h-2 rounded-full bg-brand-rose shadow-[0_0_8px_rgba(232,180,165,0.8)]" />
+          <div className="w-1.5 h-1.5 rounded-full bg-brand-taupe/30" />
+          <div className="w-1.5 h-1.5 rounded-full bg-brand-taupe/30" />
+        </div>
+      </footer>
+    </div>
   );
 }

@@ -1,78 +1,79 @@
-﻿'use client';
-import { useRouter, usePathname } from 'next/navigation';
-import React from 'react';
-
-const tabs = [
-  {
-    id: 'home', label: 'Home', path: '/dashboard',
-    icon: (active: boolean) => (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={active ? '#F6D7CF' : '#6B5A57'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-      </svg>
-    )
-  },
-  {
-    id: 'directory', label: 'Discover', path: '/directory',
-    icon: (active: boolean) => (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={active ? '#F6D7CF' : '#6B5A57'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
-    )
-  },
-  {
-    id: 'results', label: 'Match', path: '/results',
-    icon: (active: boolean) => (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={active ? '#F6D7CF' : '#6B5A57'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-      </svg>
-    )
-  },
-  {
-    id: 'profile', label: 'Profile', path: '/profile',
-    icon: (active: boolean) => (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={active ? '#F6D7CF' : '#6B5A57'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-        <circle cx="12" cy="7" r="4"></circle>
-      </svg>
-    )
-  },
-];
+"use client";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function BottomTabBar() {
-  const router = useRouter();
   const pathname = usePathname();
+
+  const tabs = [
+    {
+      name: "Home",
+      path: "/dashboard",
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth={active ? "0" : "1.75"} strokeLinecap="round" strokeLinejoin="round">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          {active ? null : <polyline points="9 22 9 12 15 12 15 22"></polyline>}
+        </svg>
+      )
+    },
+    {
+      name: "Mutuals",
+      path: "/mutuals",
+      isActive: pathname.startsWith("/directory") || pathname.startsWith("/results") || pathname === "/mutuals",
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth={active ? "0" : "1.75"} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+      )
+    },
+    {
+      name: "Compatible",
+      path: "/compatible",
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.2" : "1.75"} strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      )
+    },
+    {
+      name: "Profile",
+      path: "/profile",
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth={active ? "0" : "1.75"} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      )
+    }
+  ];
+
   return (
-    <nav className="glass-panel" style={{
-      position: 'fixed', bottom: 0, left: 0, right: 0,
-      display: 'flex', height: 64,
-      paddingBottom: 'env(safe-area-inset-bottom)',
-      zIndex: 50,
-      borderTop: '1px solid rgba(246, 215, 207, 0.1)'
-    }}>
-      {tabs.map(tab => {
-        const isActive = pathname === tab.path || pathname.startsWith(tab.path + '/');
-        return (
-          <button key={tab.id}
-            onClick={() => router.push(tab.path)}
-            style={{
-              flex: 1, display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: 4,
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: isActive ? '#F6D7CF' : '#6B5A57',
-              transition: 'color 0.2s, transform 0.2s'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            {tab.icon(isActive)}
-            <span style={{ fontSize: 10, fontFamily: 'Inter', fontWeight: isActive ? 500 : 400, letterSpacing: '0.02em' }}>
-              {tab.label}
-            </span>
-          </button>
-        );
-      })}
-    </nav>
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-brand-charcoal/95 backdrop-blur-2xl border-t border-brand-burgundy/25 shadow-[0_-8px_32px_rgba(0,0,0,0.5)]">
+      <nav className="max-w-md mx-auto px-8 py-3.5 flex justify-between items-center">
+        {tabs.map((tab) => {
+          const isActive = tab.isActive ?? pathname.startsWith(tab.path);
+          return (
+            <Link
+              key={tab.name}
+              href={tab.path}
+              className={`flex flex-col items-center justify-center py-1 px-3 gap-1 rounded-xl transition-all duration-200 ${
+                isActive ? "text-brand-blush" : "text-brand-taupe hover:text-brand-blush/70"
+              }`}
+            >
+              <div className="relative flex items-center justify-center">
+                {tab.icon(isActive)}
+                {isActive && (
+                  <span className="absolute -bottom-2 w-1 h-1 bg-brand-rose rounded-full" />
+                )}
+              </div>
+              <span className={`text-[10px] font-medium tracking-wider mt-1 ${isActive ? "text-brand-blush font-semibold" : "text-brand-taupe"}`}>
+                {tab.name}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
   );
 }

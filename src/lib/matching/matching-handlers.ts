@@ -61,7 +61,7 @@ export async function POST_DRY_RUN(request: NextRequest) {
   }
 
   const event = await getActiveEvent();
-  if (!event || event.status !== "CHOOSING_CLOSED") {
+  if (!event || (event.status !== "CHOOSING_CLOSED" && event.status !== "MATCHING")) {
     return NextResponse.json(
       { error: "Matching can only run after Choosing is closed." },
       { status: 400 }
@@ -82,13 +82,30 @@ export async function POST_DRY_RUN(request: NextRequest) {
     },
   });
 
-  // Return aggregate counts only — no names, no IDs (Decision #6)
+  // Return preview with names
+  const sampleMatches = result.matches;
+  const userIds = [...new Set(sampleMatches.flatMap(m => [m.user1Id, m.user2Id]))];
+  const profiles = await prisma.user.findMany({
+    where: { id: { in: userIds } },
+    select: { id: true, firstName: true, lastName: true, college: true, batch: true }
+  });
+  
+  const profileMap = new Map(profiles.map((p: any) => [p.id, p]));
+  
+  const previewMatches = sampleMatches.map(m => ({
+     user1: profileMap.get(m.user1Id),
+     user2: profileMap.get(m.user2Id),
+     matchStrength: m.matchStrength
+  }));
+
   return NextResponse.json({
     dryRun: true,
-    matchedCount: result.matchedCount,
-    unmatchedMutualPairs: result.unmatchedMutualPairs,
-    totalMutualPairs: result.totalMutualPairs,
-    totalParticipants: snapshot.participants.length,
+    stats: {
+      totalMutuals: result.totalMutualPairs,
+      singlesCount: result.unmatchedMutualPairs,
+      matchedCount: result.matchedCount,
+    },
+    matches: previewMatches
   });
 }
 
@@ -122,7 +139,7 @@ export async function POST_COMMIT(request: NextRequest) {
   }
 
   const event = await getActiveEvent();
-  if (!event || event.status !== "CHOOSING_CLOSED") {
+  if (!event || (event.status !== "CHOOSING_CLOSED" && event.status !== "MATCHING")) {
     return NextResponse.json(
       { error: "Matching can only run after Choosing is closed." },
       { status: 400 }

@@ -56,29 +56,37 @@ export default function LeaderboardPage() {
 
   if (isLoading || !session) return null;
 
-  const renderTop3 = (slice: string, gender: "MALE" | "FEMALE", title: string) => {
-    const list = entries.filter(e => e.slice === slice && e.gender === gender).sort((a, b) => a.rank - b.rank);
+  const renderTop3 = (slicePrefix: string, gender: "MALE" | "FEMALE", title: string) => {
+    const list = entries
+      .filter(e => e.slice.startsWith(slicePrefix) && e.gender === gender)
+      .sort((a, b) => a.rank - b.rank);
+      
     if (list.length === 0) return null;
 
     return (
-      <div style={{ background: '#151515', border: '1px solid #2a2a2a', borderRadius: 12, padding: 24 }}>
-        <h3 style={{ fontSize: 20, fontWeight: 'bold', color: '#f5f0ee', marginBottom: 16, paddingBottom: 8, borderBottom: '1px solid #2a2a2a' }}>{title}</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div className="bg-brand-charcoal rounded-[28px] p-7 border border-brand-burgundy/40 shadow-xl mb-6">
+        <h3 className="font-playfair text-xl font-bold text-brand-blush mb-6 pb-3 border-b border-brand-burgundy/30">
+          {title}
+        </h3>
+        <div className="flex flex-col gap-4">
           {list.map(e => (
-            <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: 12, borderRadius: 8 }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: 18,
-                ...(e.rank === 1 ? { background: '#8b1a1a', color: '#f5f0ee' } : 
-                    e.rank === 2 ? { background: '#3d1515', color: '#c9a0a0' } : 
-                                   { background: '#1e1010', color: '#7a6b6b' })
-              }}>
+            <div key={e.id} className="flex items-center gap-4 p-3 rounded-2xl bg-brand-wine/40 border border-brand-burgundy/20">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-playfair font-bold text-base shadow-sm ${
+                e.rank === 1 ? "bg-brand-blush text-brand-charcoal" :
+                e.rank === 2 ? "bg-brand-rose/30 text-brand-rose border border-brand-rose/40" :
+                               "bg-brand-wine text-brand-taupe border border-brand-burgundy/50"
+              }`}>
                 #{e.rank}
               </div>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontWeight: 600, color: '#f5f0ee' }}>{e.user.profile.firstName} {e.user.profile.lastName}</p>
-                <p style={{ fontSize: 12, color: '#7a6b6b' }}>{e.college} • {e.batch}</p>
+              <div className="flex-1 min-w-0">
+                <p className="font-playfair text-base font-semibold text-brand-blush truncate">
+                  {e.user.profile.firstName} {e.user.profile.lastName}
+                </p>
+                <p className="text-xs text-brand-taupe font-light mt-0.5">
+                  {e.college} • {e.batch}
+                </p>
               </div>
-              <div style={{ color: '#7a6b6b', fontSize: 14, fontWeight: 500 }}>
+              <div className="text-xs text-brand-rose/80 font-mono">
                 @{e.user.profile.instagramHandle}
               </div>
             </div>
@@ -89,50 +97,48 @@ export default function LeaderboardPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0d0d0d', color: '#f5f0ee', paddingBottom: 80 }}>
-      <nav style={{ background: '#151515', borderBottom: '1px solid #2a2a2a' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', height: 64, alignItems: 'center' }}>
-            <Link href="/dashboard" style={{ fontSize: 20, fontWeight: 'bold', color: '#f5f0ee' }}>Perhaps</Link>
-            <Link href="/dashboard" style={{ fontSize: 14, color: '#7a6b6b' }}>Back to Dashboard</Link>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-brand-wine text-brand-blush font-inter pb-36 selection:bg-brand-burgundy selection:text-brand-blush">
+      
+      {/* Top Bar */}
+      <div className="flex items-center justify-between px-8 pt-16 pb-2 max-w-lg mx-auto">
+        <h1 className="font-playfair text-3xl font-bold italic tracking-tight">Perhaps</h1>
+        <Link 
+          href="/dashboard"
+          className="text-xs font-semibold text-brand-taupe uppercase tracking-widest hover:text-brand-blush transition-colors"
+        >
+          Dashboard
+        </Link>
+      </div>
 
-      <main style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 16px' }}>
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <h1 style={{ fontSize: 36, fontWeight: 800, color: '#f5f0ee', letterSpacing: '-0.02em' }}>The Most Wanted</h1>
-          <p style={{ marginTop: 16, fontSize: 18, color: '#7a6b6b', maxWidth: 600, margin: '16px auto 0' }}>
-            These are the most highly requested participants of the season. Did you make the cut?
-          </p>
+      <div className="px-8 mt-8 max-w-lg mx-auto">
+        <div className="mb-10">
+          <p className="text-[11px] font-bold text-brand-taupe uppercase tracking-widest mb-1">Campus Insights</p>
+          <h2 className="font-playfair text-4xl font-bold text-brand-blush">Leaderboard</h2>
+          <p className="text-sm text-brand-taupe mt-2 font-light">Most picked students from your college and batch.</p>
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '48px 0' }}>
-            <p style={{ color: '#7a6b6b' }}>Calculating hype...</p>
+          <div className="py-20 text-center">
+            <div className="w-8 h-8 border-2 border-brand-rose border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-sm text-brand-taupe font-light">Loading rankings...</p>
           </div>
-        ) : error && entries.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 0', background: '#151515', borderRadius: 12, border: '1px solid #2a2a2a' }}>
-             <p style={{ color: '#dc2626' }}>Failed to load leaderboard.</p>
-          </div>
-        ) : entries.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 0', background: '#151515', borderRadius: 12, border: '1px solid #2a2a2a' }}>
-            <span style={{ fontSize: 36 }}>🤫</span>
-            <h3 style={{ marginTop: 16, fontSize: 18, fontWeight: 500, color: '#f5f0ee' }}>Leaderboard is under wraps</h3>
-            <p style={{ color: '#7a6b6b', marginTop: 8 }}>Check back after the Choosing phase is closed!</p>
+        ) : error || entries.length === 0 ? (
+          <div className="bg-brand-charcoal rounded-[28px] p-8 text-center border border-brand-burgundy/30">
+            <p className="font-playfair text-2xl text-brand-blush mb-2">No Rankings Yet</p>
+            <p className="text-sm text-brand-taupe font-light leading-relaxed">
+              Leaderboard rankings will be visible after the reveal phase is unlocked.
+            </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 48 }}>
-            <section>
-              <h2 style={{ fontSize: 24, fontWeight: 'bold', color: '#f5f0ee', marginBottom: 24, paddingLeft: 8, borderLeft: '4px solid #8b1a1a' }}>Overall Top 3</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
-                {renderTop3("overall", "FEMALE", "Most Wanted Girls")}
-                {renderTop3("overall", "MALE", "Most Wanted Boys")}
-              </div>
-            </section>
+          <div className="space-y-6">
+            {renderTop3("overall", "FEMALE", "Top Women — Campus Wide")}
+            {renderTop3("overall", "MALE", "Top Men — Campus Wide")}
+            {renderTop3("college:", "FEMALE", "Top Women — Your College")}
+            {renderTop3("college:", "MALE", "Top Men — Your College")}
           </div>
         )}
-      </main>
+      </div>
+
       <BottomTabBar />
     </div>
   );

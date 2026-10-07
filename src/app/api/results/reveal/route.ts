@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   }
 
   const event = await getActiveEvent();
-  if (!event || event.status !== "RESULTS_OPEN") {
+  if (!event || (event.status !== "RESULTS_OPEN" && event.status !== "CLOSED")) {
     return NextResponse.json(
       { error: "Results are not currently open." },
       { status: 403 }
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
   const redeemResult = await redeemCoupon({
     code: couponCode,
     redeemedByUserId: userId,
-    requiredPaise: 1199 * 100, // Fixed price
+    requiredPaise: 99 * 100, // Fixed price
   });
 
   if (!redeemResult.ok) {

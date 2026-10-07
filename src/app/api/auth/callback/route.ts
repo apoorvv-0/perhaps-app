@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { PrismaClient } from "@prisma/client";
 import { setSessionCookie } from "@/lib/auth/session";
+import { getActiveEvent } from "@/lib/event-service";
 
 const prisma = new PrismaClient();
 
@@ -24,7 +25,7 @@ export async function GET(request: Request) {
     }
 
     // 2. Fetch the latest user profile from Roviara API
-    const roviaraUrl = process.env.NEXT_PUBLIC_ROVIARA_URL || "http://localhost:3001";
+    const roviaraUrl = process.env.NEXT_PUBLIC_ROVIARA_URL || "https://roviara-web.vercel.app";
     const syncRes = await fetch(`${roviaraUrl}/api/sync/user?roviaraId=${roviaraId}`, {
       headers: {
         Authorization: `Bearer ${process.env.INTER_APP_SECRET}`
@@ -32,7 +33,7 @@ export async function GET(request: Request) {
     });
 
     if (!syncRes.ok) {
-      throw new Error("Failed to sync user data from Roviara Hub");
+      throw new Error(`Failed to sync user data from Roviara Hub (${roviaraUrl}). Status: ${syncRes.status}`);
     }
 
     const roviaraData = await syncRes.json();
@@ -73,16 +74,25 @@ export async function GET(request: Request) {
     await setSessionCookie({
       userId: localUser.id,
       globalRole: localUser.globalRole as any,
-      phoneVerified: true, // Inherited from Roviara completion
+      phoneVerified: true,
       profileComplete: true
     });
+
+    const event = await getActiveEvent();
+    if (event && event.status === "REGISTRATION_OPEN") {
+      await prisma.eventRegistration.upsert({
+        where: { eventId_userId: { eventId: event.id, userId: localUser.id } },
+        create: { eventId: event.id, userId: localUser.id },
+        update: {}
+      });
+    }
 
     // 5. Redirect into the app
     return NextResponse.redirect(new URL("/dashboard", request.url));
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("SSO Callback Error:", error);
-    return NextResponse.json({ error: "SSO Authentication Failed" }, { status: 401 });
+    return NextResponse.json({ error: "SSO Authentication Failed", details: error.message || error.toString() }, { status: 401 });
   }
 }
 

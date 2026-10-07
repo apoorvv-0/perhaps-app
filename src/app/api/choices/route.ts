@@ -1,8 +1,6 @@
 /**
  * GET  /api/choices      - Get current user's ranked choices
- * PUT  /api/choices      - Atomic replace-all of ranked choices (Decision #1, #2)
- *
- * Save is an atomic delete-and-reinsert inside a single transaction.
+ * PUT  /api/choices      - Atomic replace-all of ranked choices
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -10,10 +8,6 @@ import { prisma } from "@/lib/db/prisma";
 import { getSession } from "@/lib/auth/session";
 import { getActiveEvent } from "@/lib/event-service";
 import { z } from "zod";
-
-const choicesSchema = z
-  .array(z.string().uuid("Each pick must be a valid user ID"))
-  .max(12, "You can pick at most 12 people.");
 
 export async function GET() {
   const session = await getSession();
@@ -23,7 +17,7 @@ export async function GET() {
 
   const event = await getActiveEvent();
   if (!event) {
-    return NextResponse.json({ choices: [] });
+    return NextResponse.json({ choices: [], maxChoicesAllowed: 3 });
   }
 
   const choices = await prisma.choice.findMany({
@@ -34,13 +28,27 @@ export async function GET() {
       pickedId: true,
       picked: {
         select: {
-          firstName: true, lastName: true, college: true, batch: true
+          firstName: true,
+          lastName: true,
+          gender: true,
+          college: true,
+          batch: true,
         },
       },
     },
   });
 
-  return NextResponse.json({ choices });
+  const coupons = await prisma.coupon.findMany({
+    where: { redeemedBy: session.userId, eventId: event.id, status: 'REDEEMED' }
+  });
+  const totalSpent = coupons.reduce((acc, c) => acc + c.faceValue, 0);
+  let maxChoicesAllowed = 3;
+  if (totalSpent >= 21600) maxChoicesAllowed = 15;
+  else if (totalSpent >= 16700) maxChoicesAllowed = 12;
+  else if (totalSpent >= 11800) maxChoicesAllowed = 9;
+  else if (totalSpent >= 6900) maxChoicesAllowed = 6;
+
+  return NextResponse.json({ choices, maxChoicesAllowed });
 }
 
 export async function PUT(request: NextRequest) {
@@ -63,7 +71,19 @@ export async function PUT(request: NextRequest) {
 
   const bodyObj = body as { picks?: unknown; choices?: unknown };
   const rawList = bodyObj.choices ?? bodyObj.picks;
-  const parsed = choicesSchema.safeParse(rawList);
+
+  const coupons = await prisma.coupon.findMany({
+    where: { redeemedBy: session.userId, eventId: event.id, status: 'REDEEMED' }
+  });
+  const totalSpent = coupons.reduce((acc, c) => acc + c.faceValue, 0);
+  let maxAllowed = 3;
+  if (totalSpent >= 21600) maxAllowed = 15;
+  else if (totalSpent >= 16700) maxAllowed = 12;
+  else if (totalSpent >= 11800) maxAllowed = 9;
+  else if (totalSpent >= 6900) maxAllowed = 6;
+
+  const dynSchema = z.array(z.string().uuid("Each pick must be a valid user ID")).max(maxAllowed, `You can only pick up to ${maxAllowed} people.`);
+  const parsed = dynSchema.safeParse(rawList);
   
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid picks" }, { status: 400 });
@@ -71,63 +91,62 @@ export async function PUT(request: NextRequest) {
 
   const pickedIds = parsed.data;
 
-  if (new Set(pickedIds).size !== pickedIds.length) {
-    return NextResponse.json({ error: "Duplicate picks are not allowed." }, { status: 400 });
+  const reg = await prisma.eventRegistration.findUnique({ where: { eventId_userId: { eventId: event.id, userId: session.userId } } });
+  const isExempt = reg?.minChoiceExempt ?? false;
+
+  if (!isExempt && (pickedIds.length === 1 || pickedIds.length === 2)) {
+    return NextResponse.json({ error: "You must select 0, or at least 3 people. 1 or 2 is not allowed." }, { status: 400 });
+  }
+
+  const uniqueIds = Array.from(new Set(pickedIds));
+  if (uniqueIds.length !== pickedIds.length) {
+    return NextResponse.json({ error: "Duplicate choices are not allowed." }, { status: 400 });
   }
 
   if (pickedIds.includes(session.userId)) {
     return NextResponse.json({ error: "You cannot pick yourself." }, { status: 400 });
   }
 
-  // --- Admin Exemption Check ---
-  const myRegistration = await prisma.eventRegistration.findUnique({
-    where: { eventId_userId: { eventId: event.id, userId: session.userId } }
-  });
-
-  if (!myRegistration) {
-    return NextResponse.json({ error: "You are not registered for this event." }, { status: 403 });
+  const pickerUser = await prisma.user.findUnique({ where: { id: session.userId } });
+  if (!pickerUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+  
+  if (pickedIds.length > 0) {
+    const validTargets = await prisma.user.findMany({
+      where: {
+        id: { in: pickedIds },
+        status: "ACTIVE",
+        gender: pickerUser.gender === "MALE" ? "FEMALE" : "MALE",
+        eventRegistrations: { some: { eventId: event.id } }
+      }
+    });
+    
+    if (validTargets.length !== pickedIds.length) {
+      return NextResponse.json({ error: "One or more selected users are invalid, inactive, or not participating." }, { status: 400 });
+    }
   }
 
-  if (!myRegistration.minChoiceExempt && pickedIds.length > 0 && pickedIds.length < 3) {
-    return NextResponse.json({ error: "You must pick at least 3 people (or clear all)." }, { status: 400 });
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.choice.deleteMany({
+        where: { eventId: event.id, pickerId: session.userId },
+      });
+
+      if (pickedIds.length > 0) {
+        const createData = pickedIds.map((id, index) => ({
+          eventId: event.id,
+          pickerId: session.userId,
+          pickedId: id,
+          rank: index + 1,
+        }));
+        await tx.choice.createMany({ data: createData });
+      }
+    });
+
+    return NextResponse.json({ ok: true, count: pickedIds.length });
+  } catch (err: any) {
+    if (err.code === 'P2002' || err.message?.includes('Unique constraint')) {
+      return NextResponse.json({ error: "Your choices were just updated. Please refresh the page." }, { status: 409 });
+    }
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
-
-  // Verify all picks
-  const me = await prisma.user.findUniqueOrThrow({ where: { id: session.userId } });
-  const oppositeGender = me.gender === "MALE" ? "FEMALE" : "MALE";
-
-  const pickedUsers = await prisma.user.findMany({
-    where: { id: { in: pickedIds } },
-    include: { eventRegistrations: { where: { eventId: event.id } } },
-  });
-
-  for (const id of pickedIds) {
-    const user = pickedUsers.find((u) => u.id === id);
-    if (!user) return NextResponse.json({ error: `User ${id} not found.` }, { status: 400 });
-    if (user.status !== "ACTIVE") return NextResponse.json({ error: `User ${id} is not active.` }, { status: 400 });
-    if (user.gender !== oppositeGender) return NextResponse.json({ error: `Same-gender picks are not allowed.` }, { status: 400 });
-    if (user.eventRegistrations.length === 0) return NextResponse.json({ error: `User ${id} is not registered for this event.` }, { status: 400 });
-  }
-
-  await prisma.$transaction([
-    prisma.choice.deleteMany({
-      where: { eventId: event.id, pickerId: session.userId },
-    }),
-    prisma.choice.createMany({
-      data: pickedIds.map((pickedId, index) => ({
-        eventId: event.id,
-        pickerId: session.userId,
-        pickedId,
-        rank: index + 1,
-      })),
-    }),
-  ]);
-
-  return NextResponse.json({
-    ok: true,
-    savedCount: pickedIds.length,
-    message: `${pickedIds.length} picks saved successfully.`,
-  });
 }
-
-export const dynamic = "force-dynamic";

@@ -55,6 +55,16 @@ export async function GET(request: NextRequest) {
     select: { id: true, firstName: true, lastName: true },
   });
 
+  const collegeConfig = await prisma.appConfig.findUnique({ where: { key: 'colleges' } });
+  const aliasMap = new Map<string, string>();
+  if (collegeConfig && Array.isArray(collegeConfig.value)) {
+    for (const c of collegeConfig.value) {
+      if (c && typeof c === 'object' && (c as any).name && (c as any).alias) {
+        aliasMap.set((c as any).name, (c as any).alias);
+      }
+    }
+  }
+
   const nameCounts = new Map<string, number>();
   for (const p of allNames) {
     const key = `${p.firstName.toLowerCase()}|${p.lastName.toLowerCase()}`;
@@ -62,9 +72,9 @@ export async function GET(request: NextRequest) {
   }
 
   const enriched = profiles.map((p) => ({
-    userId: p.id,
-    firstName: p.firstName, lastName: p.lastName, college: p.college, batch: p.batch,
-    hasDuplicateName: (nameCounts.get(`${p.firstName.toLowerCase()}|${p.lastName.toLowerCase()}`) ?? 0) > 1,
+    id: p.id, gender: oppositeGender,
+    firstName: p.firstName, lastName: p.lastName, college: aliasMap.get(p.college || "") || p.college, batch: p.batch,
+    alias: (nameCounts.get(`${p.firstName.toLowerCase()}|${p.lastName.toLowerCase()}`) ?? 0) > 1 ? (aliasMap.get(p.college || "") || p.college) : undefined,
   }));
 
   return NextResponse.json({

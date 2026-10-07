@@ -1,187 +1,241 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingScreen from "@/components/LoadingScreen";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import Link from "next/link";
 import BottomTabBar from "@/components/BottomTabBar";
 
-const PHASE_LABELS: Record<string, string> = {
-  DRAFT: 'Coming Soon',
-  REGISTRATION_OPEN: 'Registration Open',
-  REGISTRATION_CLOSED: 'Registration Closed',
-  CHOOSING_OPEN: 'Choosing Phase',
-  CHOOSING_CLOSED: 'Choices Locked',
-  MATCHING: 'Matching in Progress',
-  RESULTS_OPEN: 'Results Live',
-  CLOSED: 'Event Closed',
-  ARCHIVED: 'Archived'
+const PHASE_LABELS: Record<string, { title: string; sub: string; color: string; label: string }> = {
+  DRAFT:               { title: "Planning", sub: "Event is being set up.", color: "#6B5A57", label: "Hidden" },
+  REGISTRATION_OPEN:   { title: "Registrations Open", sub: "Join the event before it closes.", color: "#F6D7CF", label: "Live" },
+  REGISTRATION_CLOSED: { title: "Registrations Closed", sub: "Choosing begins soon.", color: "#6B5A57", label: "Paused" },
+  CHOOSING_OPEN:       { title: "Lock Choices", sub: "Pick the people you'd want to date. You will be matched with your strongest mutual connection.", color: "#F6D7CF", label: "Active" },
+  CHOOSING_CLOSED:     { title: "Choosing Closed", sub: "Choices are locked. Matching begins soon.", color: "#6B5A57", label: "Locked" },
+  MATCHING:            { title: "Matching...", sub: "Algorithm calculating mutuals.", color: "#6B5A57", label: "Wait" },
+  RESULTS_OPEN:        { title: "Results Out", sub: "Find out who matched with you.", color: "#E8B4A5", label: "Live" },
+  CLOSED:              { title: "Closed", sub: "Event officially ended.", color: "#6B5A57", label: "Ended" },
+  ARCHIVED:            { title: "Archived", sub: "Event archived.", color: "#6B5A57", label: "Past" },
+  UNKNOWN:             { title: "Loading...", sub: "", color: "#6B5A57", label: "" },
 };
 
+function CountdownTimer({ endTime }: { endTime: number }) {
+  const [timeLeft, setTimeLeft] = useState("");
+  useEffect(() => {
+    const update = () => {
+      const diff = endTime - Date.now();
+      if (diff <= 0) return setTimeLeft("00:00:00");
+      const h = Math.floor(diff / (1000 * 60 * 60));
+      const m = Math.floor((diff / (1000 * 60)) % 60);
+      const s = Math.floor((diff / 1000) % 60);
+      setTimeLeft(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`);
+    };
+    update();
+    const int = setInterval(update, 1000);
+    return () => clearInterval(int);
+  }, [endTime]);
+  return <>{timeLeft}</>;
+}
+
 export default function DashboardPage() {
-  const { session, isLoading, logout } = useAuth();
+  const { session, isLoading } = useAuth();
   const router = useRouter();
-  const [phase, setPhase] = useState("Loading...");
+  const [phase, setPhase] = useState("LOADING");
   const [firstName, setFirstName] = useState("");
+  const [endTime, setEndTime] = useState<number | null>(null);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [registering, setRegistering] = useState(false);
 
   useEffect(() => {
     if (!isLoading) {
-      if (!session) {
-        router.push("/");
-      } else {
-        fetchData();
-      }
+      if (!session) router.push("/");
+      else fetchData();
     }
   }, [session, isLoading, router]);
 
   const fetchData = async () => {
     try {
-      const profRes = await fetch("/api/profile");
+      const [profRes, statusRes] = await Promise.all([
+        fetch("/api/profile"),
+        fetch("/api/event/status"),
+      ]);
       if (profRes.ok) {
-        const pData = await profRes.json();
-        setFirstName(pData.profile?.firstName || "Guest");
+        const p = await profRes.json();
+        setFirstName(p.profile?.firstName || "");
       }
-      // eventPhase is included in BOTH 200 and 403 responses from directory API
-      const dirRes = await fetch("/api/directory");
-      const dirData = await dirRes.json();
-      if (dirData.eventPhase) {
-        setPhase(dirData.eventPhase);
-      } else {
-        // Fallback for SUPER_ADMIN via admin event endpoint
-        const adminRes = await fetch("/api/admin/event");
-        if (adminRes.ok) {
-          const adminData = await adminRes.json();
-          setPhase(adminData.event?.status || "Unknown");
-        } else {
-          setPhase("Unknown");
+      if (statusRes.ok) {
+        const s = await statusRes.json();
+        setPhase(s.status || "UNKNOWN");
+        setIsRegistered(!!s.isRegistered);
+        if (s.registrationEndAt && s.status === "REGISTRATION_OPEN") {
+          setEndTime(new Date(s.registrationEndAt).getTime());
         }
       }
-    } catch (e) {
-      console.error(e);
-      setPhase("Unknown");
+    } catch {
+      setPhase("UNKNOWN");
     }
   };
 
-  if (isLoading || !session) return <div style={{ minHeight: '100vh', background: '#2B0609' }} />;
-
-  const isSuperAdmin = session.globalRole === "SUPER_ADMIN";
-  const isEventAdmin = session.eventRoles?.includes("ADMIN");
-  const isCashier = session.eventRoles?.includes("CASHIER");
-  const displayPhase = PHASE_LABELS[phase] || phase;
-
-  const cardStyle = {
-    display: 'flex', flexDirection: 'column' as const, textDecoration: 'none',
-    transition: 'all 0.2s ease', cursor: 'pointer', padding: '24px'
+  const handleRegister = async () => {
+    setRegistering(true);
+    try {
+      const res = await fetch("/api/event/register", { method: "POST" });
+      if (res.ok) {
+        setIsRegistered(true);
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to register");
+      }
+    } catch {
+      alert("Registration failed");
+    } finally {
+      setRegistering(false);
+    }
   };
-  
-  const hoverProps = {
-    onMouseOver: (e: any) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = "rgba(246, 215, 207, 0.2)"; },
-    onMouseOut: (e: any) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(246, 215, 207, 0.05)"; }
-  };
+
+  if (isLoading || !session || phase === "LOADING") {
+    return <LoadingScreen />;
+  }
+
+  const meta = PHASE_LABELS[phase] || PHASE_LABELS.UNKNOWN;
+  const isResultsOpen = phase === "RESULTS_OPEN" || phase === "CLOSED";
+  const isChoosingOpen = phase === "CHOOSING_OPEN";
 
   return (
-    <div className="min-h-screen bg-brand-wine text-brand-blush font-inter relative pb-24">
-      {/* Background Glow */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-burgundy/30 via-brand-wine/0 to-brand-wine/0" />
+    <div className="min-h-screen bg-brand-wine text-brand-blush font-inter pb-32 selection:bg-brand-burgundy selection:text-brand-blush">
 
-      {/* Top Section */}
-      <div className="relative z-10 max-w-2xl mx-auto px-6 pt-12 pb-6">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="font-playfair text-[28px] text-brand-blush mb-1">
-              {(() => { const hour = new Date().getHours(); return hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'; })()}, {firstName}
-            </h1>
-          </div>
-          <button onClick={logout} className="text-brand-taupe hover:text-brand-blush text-sm transition-colors">
-            Logout
-          </button>
-        </div>
-        
-        {/* Phase Banner */}
-        <div className="glass-panel p-5 rounded-2xl border-l-4 border-l-brand-burgundy">
-          {phase === 'REGISTRATION_OPEN' ? (
-            <>
-              <p className="text-[11px] text-brand-taupe uppercase tracking-widest font-bold mb-1">Status</p>
-              <p className="text-[16px] text-brand-blush font-semibold">You are registered.</p>
-              <p className="text-[13px] text-brand-rose mt-1">Choosing your maybes begins soon.</p>
-            </>
-          ) : phase === 'CHOOSING_OPEN' ? (
-            <>
-              <p className="text-[11px] text-brand-taupe uppercase tracking-widest font-bold mb-1">Status</p>
-              <p className="text-[16px] text-brand-blush font-semibold">Choosing is live!</p>
-              <p className="text-[13px] text-brand-rose mt-1">Go to Discover to rank your matches.</p>
-            </>
-          ) : phase === 'CHOOSING_CLOSED' || phase === 'MATCHING' ? (
-             <>
-              <p className="text-[11px] text-brand-taupe uppercase tracking-widest font-bold mb-1">Status</p>
-              <p className="text-[16px] text-brand-blush font-semibold">Choices Locked.</p>
-              <p className="text-[13px] text-brand-rose mt-1">Matches are being calculated...</p>
-            </>
-          ) : (
-            <>
-              <p className="text-[11px] text-brand-taupe uppercase tracking-widest font-bold mb-1">Current Phase</p>
-              <p className="text-[16px] text-brand-blush font-semibold">{displayPhase}</p>
-            </>
-          )}
-        </div>
+      {/* Top Bar */}
+      <div className="flex items-center justify-between px-8 pt-16 pb-2">
+        <h1 className="font-playfair text-3xl font-bold italic tracking-tight">Perhaps</h1>
+        <button className="w-11 h-11 rounded-full bg-brand-charcoal flex items-center justify-center border border-brand-taupe/20 text-brand-blush">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>
+          </svg>
+        </button>
       </div>
 
-      {/* Cards Grid */}
-      <div className="relative z-10 max-w-2xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        
-        {phase === "RESULTS_OPEN" && (
-          <Link href="/results" className="charcoal-card col-span-1 sm:col-span-2 relative overflow-hidden group" style={{ ...cardStyle, border: "1px solid rgba(232, 180, 165, 0.4)" }} onMouseOver={hoverProps.onMouseOver} onMouseOut={hoverProps.onMouseOut}>
-            <div className="absolute inset-0 bg-gradient-to-br from-brand-burgundy/20 to-transparent pointer-events-none" />
-            <h2 className="font-playfair text-[24px] text-brand-rose mb-1 relative z-10">Results are live</h2>
-            <p className="text-[13px] text-brand-taupe relative z-10">See if you have a mutual match.</p>
-          </Link>
-        )}
+      <div className="px-8 mt-8 max-w-lg mx-auto">
 
-        <Link href="/directory" className="charcoal-card" style={cardStyle} onMouseOver={hoverProps.onMouseOver} onMouseOut={hoverProps.onMouseOut}>
-          <h2 className="font-playfair text-[20px] text-brand-blush mb-1">Discover</h2>
-          <p className="text-[13px] text-brand-taupe">Browse and rank your potential matches.</p>
-        </Link>
+        {/* Greeting */}
+        <p className="text-sm font-medium text-brand-taupe mb-1">Welcome back,</p>
+        <h2 className="text-3xl font-bold mb-10 text-brand-blush">{firstName || "Student"}</h2>
 
-        {phase === "RESULTS_OPEN" && (
-          <Link href="/leaderboard" className="charcoal-card" style={cardStyle} onMouseOver={hoverProps.onMouseOver} onMouseOut={hoverProps.onMouseOut}>
-            <h2 className="font-playfair text-[20px] text-brand-blush mb-1">Leaderboard</h2>
-            <p className="text-[13px] text-brand-taupe">See the most wanted.</p>
-          </Link>
-        )}
+        {/* Phase Card */}
+        <div className="w-full bg-brand-charcoal rounded-[28px] p-8 mb-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-brand-burgundy/20 rounded-full blur-[60px] pointer-events-none" />
 
-        <Link href="/profile" className="charcoal-card" style={cardStyle} onMouseOver={hoverProps.onMouseOver} onMouseOut={hoverProps.onMouseOut}>
-          <h2 className="font-playfair text-[20px] text-brand-blush mb-1">Profile</h2>
-          <p className="text-[13px] text-brand-taupe">Edit your personal details.</p>
-        </Link>
-
-        {(isSuperAdmin || isEventAdmin || isCashier) && (
-          <>
-            <div className="col-span-1 sm:col-span-2 mt-4 mb-2">
-              <p className="text-[11px] text-brand-taupe uppercase tracking-widest font-bold px-1">Admin Tools</p>
+          <div className="relative z-10">
+            <div className="inline-flex items-center gap-2 mb-6">
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: meta.color }} />
+              <span className="text-[11px] uppercase tracking-widest font-bold" style={{ color: meta.color }}>{meta.label}</span>
             </div>
-            
-            {isSuperAdmin && (
-              <Link href={process.env.NEXT_PUBLIC_ROVIARA_URL ? `${process.env.NEXT_PUBLIC_ROVIARA_URL}/superadmin` : "#"} className="charcoal-card" style={cardStyle} onMouseOver={hoverProps.onMouseOver} onMouseOut={hoverProps.onMouseOut}>
-                <h2 className="font-playfair text-[20px] text-brand-rose mb-1">Roviara Hub</h2>
-                <p className="text-[13px] text-brand-taupe">SuperAdmin command center.</p>
-              </Link>
+
+            <h3 className="font-playfair text-4xl mb-3 text-brand-blush leading-tight">{meta.title}</h3>
+            <p className="text-sm text-brand-taupe leading-relaxed mb-10 max-w-[220px]">{meta.sub}</p>
+
+            {endTime && phase === "REGISTRATION_OPEN" && (
+              <div className="mb-10 flex flex-col gap-2">
+                <span className="text-[11px] text-brand-taupe uppercase tracking-widest font-bold">Time Remaining</span>
+                <span className="text-3xl font-mono text-brand-rose tracking-wider">
+                  <CountdownTimer endTime={endTime} />
+                </span>
+              </div>
             )}
 
-            {(isSuperAdmin || isEventAdmin) && (
-              <Link href="/admin" className="charcoal-card" style={cardStyle} onMouseOver={hoverProps.onMouseOver} onMouseOut={hoverProps.onMouseOut}>
-                <h2 className="font-playfair text-[20px] text-brand-blush mb-1">Event Control</h2>
-                <p className="text-[13px] text-brand-taupe">Manage phases & matching.</p>
+            {phase === "REGISTRATION_OPEN" && !isRegistered ? (
+              <button
+                onClick={handleRegister}
+                disabled={registering}
+                className="w-full py-5 rounded-full font-semibold text-brand-charcoal bg-gradient-to-r from-brand-blush to-brand-rose active:scale-[0.98] transition-all text-base tracking-wide"
+              >
+                {registering ? "Registering..." : "Register Now"}
+              </button>
+            ) : phase === "REGISTRATION_CLOSED" && !isRegistered ? (
+              <button
+                disabled
+                className="w-full py-5 rounded-full font-semibold text-brand-taupe bg-brand-wine border border-brand-burgundy/50 text-base tracking-wide opacity-70 cursor-not-allowed"
+              >
+                Registrations Closed
+              </button>
+            ) : (
+              <Link
+                href={isResultsOpen ? "/results" : "/directory"}
+                className="w-full py-5 rounded-full font-semibold text-brand-charcoal bg-gradient-to-r from-brand-blush to-brand-rose active:scale-[0.98] transition-all text-base tracking-wide flex items-center justify-center"
+              >
+                {isResultsOpen ? "View Your Match" : isChoosingOpen ? "Choose Mutuals" : "Choose Your Partner"}
               </Link>
             )}
+          </div>
+        </div>
 
-            {(isSuperAdmin || isCashier) && (
-              <Link href="/cashier" className="charcoal-card" style={cardStyle} onMouseOver={hoverProps.onMouseOver} onMouseOut={hoverProps.onMouseOut}>
-                <h2 className="font-playfair text-[20px] text-brand-blush mb-1">Cashier</h2>
-                <p className="text-[13px] text-brand-taupe">Issue coupons & verify payments.</p>
-              </Link>
-            )}
-          </>
+        {/* Quick-access Grid */}
+        <div className="grid grid-cols-2 gap-5 mt-2">
+          <Link href="/profile" className="bg-brand-charcoal rounded-[28px] p-7 flex flex-col justify-between min-h-[160px] active:scale-[0.98] transition-transform">
+            <div className="w-10 h-10 rounded-full bg-brand-wine flex items-center justify-center">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F6D7CF" strokeWidth="1.8">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <div>
+              <p className="font-playfair text-xl text-brand-blush mb-1">Profile</p>
+              <p className="text-[10px] text-brand-taupe uppercase tracking-widest">Your settings</p>
+            </div>
+          </Link>
+
+          {isResultsOpen ? (
+            <Link href="/leaderboard" className="bg-brand-charcoal rounded-[28px] p-7 flex flex-col justify-between min-h-[160px] active:scale-[0.98] transition-transform">
+              <div className="w-10 h-10 rounded-full bg-brand-wine flex items-center justify-center">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F6D7CF" strokeWidth="1.8">
+                  <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                  <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                  <path d="M4 22h16"></path>
+                  <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+                </svg>
+              </div>
+              <div>
+                <p className="font-playfair text-xl text-brand-blush mb-1">Picks</p>
+                <p className="text-[10px] text-brand-taupe uppercase tracking-widest">Leaderboard</p>
+              </div>
+            </Link>
+          ) : (
+            <div className="bg-brand-charcoal/40 rounded-[28px] p-7 flex flex-col justify-between min-h-[160px] opacity-40">
+              <div className="w-10 h-10 rounded-full bg-brand-wine/50 flex items-center justify-center">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B5A57" strokeWidth="1.8">
+                  <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </div>
+              <div>
+                <p className="font-playfair text-xl text-brand-taupe mb-1">Picks</p>
+                <p className="text-[10px] text-brand-taupe/50 uppercase tracking-widest">Locked</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Staff Tools */}
+        {(session.globalRole === "SUPER_ADMIN" || session?.eventRoles?.includes("ADMIN") || session?.eventRoles?.includes("CASHIER")) && (
+          <div className="pt-8 mt-8 border-t border-brand-burgundy/30">
+            <p className="text-[10px] text-brand-taupe font-bold uppercase tracking-widest mb-4">Operations Center</p>
+            <div className="flex flex-col gap-3">
+              {(session.globalRole === "SUPER_ADMIN" || session?.eventRoles?.includes("ADMIN")) && (
+                <Link href="/admin" className="flex items-center justify-between bg-brand-charcoal/40 backdrop-blur-md border border-brand-rose/10 rounded-2xl px-6 py-4 hover:border-brand-rose/30 transition-all shadow-sm group">
+                  <span className="text-sm font-semibold text-brand-blush">Event Admin</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B5A57" strokeWidth="2" className="group-hover:text-brand-rose group-hover:translate-x-1 transition-all"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                </Link>
+              )}
+              {(session.globalRole === "SUPER_ADMIN" || session?.eventRoles?.includes("CASHIER")) && (
+                <Link href="/cashier" className="flex items-center justify-between bg-brand-charcoal/40 backdrop-blur-md border border-brand-rose/10 rounded-2xl px-6 py-4 hover:border-brand-rose/30 transition-all shadow-sm group">
+                  <span className="text-sm font-semibold text-brand-blush">Cashier Desk</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B5A57" strokeWidth="2" className="group-hover:text-brand-rose group-hover:translate-x-1 transition-all"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                </Link>
+              )}
+            </div>
+          </div>
         )}
+
       </div>
 
       <BottomTabBar />

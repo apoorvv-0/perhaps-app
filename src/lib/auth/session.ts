@@ -30,7 +30,13 @@ export async function setSessionCookie(payload: SessionPayload): Promise<void> {
 
 export async function clearSessionCookie(): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.delete(COOKIE_NAME);
+  cookieStore.set(COOKIE_NAME, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
 }
 
 export async function getSession(): Promise<SessionPayload | null> {
@@ -81,3 +87,4 @@ export async function hasEventRole(
 
   return !!eventRole;
 }
+

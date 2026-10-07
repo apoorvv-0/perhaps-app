@@ -18,7 +18,7 @@ export async function GET() {
   }
 
   const event = await getActiveEvent();
-  if (!event || event.status !== "RESULTS_OPEN") {
+  if (!event || (event.status !== "RESULTS_OPEN" && event.status !== "CLOSED")) {
     return NextResponse.json(
       { error: "Results are not yet available." },
       { status: 403 }

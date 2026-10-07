@@ -26,12 +26,12 @@ const AUTO_TRANSITIONS: Partial<Record<EventPhase, EventPhase>> = {
 export const VALID_NEXT_PHASES: Record<EventPhase, EventPhase[]> = {
   DRAFT:               ["REGISTRATION_OPEN"],
   REGISTRATION_OPEN:   ["REGISTRATION_CLOSED"],
-  REGISTRATION_CLOSED: ["CHOOSING_OPEN", "REGISTRATION_OPEN", "DRAFT"],  // rollbacks: reopen reg or cancel
+  REGISTRATION_CLOSED: ["CHOOSING_OPEN", "REGISTRATION_OPEN", "DRAFT"],
   CHOOSING_OPEN:       ["CHOOSING_CLOSED"],
-  CHOOSING_CLOSED:     ["MATCHING", "CHOOSING_OPEN"],                    // rollback: reopen choosing
-  MATCHING:            ["RESULTS_OPEN", "CHOOSING_CLOSED"],              // rollback: back to closed choosing
-  RESULTS_OPEN:        ["CLOSED"],
-  CLOSED:              ["ARCHIVED"],
+  CHOOSING_CLOSED:     ["MATCHING", "CHOOSING_OPEN"],
+  MATCHING:            ["RESULTS_OPEN", "CHOOSING_CLOSED"],
+  RESULTS_OPEN:        ["CLOSED", "MATCHING"],
+  CLOSED:              ["ARCHIVED", "RESULTS_OPEN"],
   ARCHIVED:            [],
 };
 

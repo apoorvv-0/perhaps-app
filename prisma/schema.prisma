@@ -315,3 +315,8 @@ model AuditLog {
   @@index([targetUserId])
   @@index([timestamp])
 }
+
+model AppConfig {
+  key   String @id
+  value Json
+}

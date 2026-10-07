@@ -15,8 +15,23 @@ export async function GET() {
     return NextResponse.json({ entries: [] });
   }
 
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: { college: true, batch: true }
+  });
+
+  const validSlices = [
+    "overall",
+    user?.college ? `college:${user.college}` : "",
+    user?.batch ? `batch:${user.batch}` : ""
+  ].filter(Boolean);
+
   const entries = await prisma.leaderboardEntry.findMany({
-    where: { eventId: event.id, rank: { lte: 3 } },
+    where: { 
+      eventId: event.id, 
+      rank: { lte: 3 },
+      slice: { in: validSlices }
+    },
     include: {
       user: {
         select: { firstName: true, lastName: true, instagramHandle: true }

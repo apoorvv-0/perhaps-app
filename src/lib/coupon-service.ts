@@ -184,10 +184,22 @@ export async function voidCoupon(input: VoidCouponInput): Promise<VoidResult> {
 // ─────────────────────────────────────────────
 
 export async function getCashierLedger(cashierId: string, eventId: string) {
-  const coupons = await prisma.coupon.findMany({
+  const couponsRaw = await prisma.coupon.findMany({
     where: { cashierId, eventId },
     orderBy: { issuedAt: "desc" },
   });
+  
+  const redeemerIds = couponsRaw.map(c => c.redeemedBy).filter(Boolean) as string[];
+  const redeemers = await prisma.user.findMany({
+    where: { id: { in: redeemerIds } },
+    select: { id: true, firstName: true, lastName: true, instagramHandle: true }
+  });
+  const redeemerMap = new Map(redeemers.map(r => [r.id, r]));
+  
+  const coupons = couponsRaw.map(c => ({
+    ...c,
+    redeemer: c.redeemedBy ? redeemerMap.get(c.redeemedBy) || null : null
+  }));
 
   const totalIssued = coupons.filter((c) => c.status !== "VOIDED").length;
   const totalRedeemed = coupons.filter((c) => c.status === "REDEEMED").length;

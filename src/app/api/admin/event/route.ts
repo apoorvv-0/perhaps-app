@@ -48,15 +48,15 @@ export async function POST(req: NextRequest) {
     const name = eventName?.trim() || `Perhaps Event`;
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now();
 
-    const newEvent = await prisma.event.updateMany({
-        where: { status: { not: 'ARCHIVED' } },
-        data: { status: 'ARCHIVED' },
-      });
-      await prisma.event.create({
+    await prisma.event.updateMany({
+      where: { status: { not: 'ARCHIVED' } },
+      data: { status: 'ARCHIVED' },
+    });
+    
+    const newEvent = await prisma.event.create({
       data: {
         name,
         slug,
-        
         status: "DRAFT",
         colleges: "[]",
         batches: "[]",
@@ -80,6 +80,15 @@ export async function POST(req: NextRequest) {
     }
   }
 
+    if (action === "UPDATE_TIMER") {
+    const { registrationEndAt } = body;
+    const updatedEvent = await prisma.event.update({
+      where: { id: event.id },
+      data: { registrationEndAt: registrationEndAt ? new Date(registrationEndAt) : null },
+    });
+    return NextResponse.json({ ok: true, event: updatedEvent });
+  }
+
   const validNext = VALID_NEXT_PHASES[event.status];
   if (!validNext.includes(nextPhase)) {
     return NextResponse.json(
@@ -95,3 +104,6 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: true, event: updatedEvent });
 }
+
+
+
