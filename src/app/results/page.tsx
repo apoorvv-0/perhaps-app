@@ -41,8 +41,22 @@ export default function ResultsPage() {
     try {
       const res = await fetch("/api/results");
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to load results.");
-      setMatchStatus(data);
+      if (!res.ok) {
+        if (res.status === 403) {
+          setMatchStatus({ state: "not_open" });
+        } else {
+          throw new Error(data.error || "Failed to load results.");
+        }
+        return;
+      }
+      
+      if (!data.matched) {
+        setMatchStatus({ state: "no_match" });
+      } else if (data.revealed) {
+        setMatchStatus({ state: "matched_revealed", matchedUser: data.matchedUser });
+      } else {
+        setMatchStatus({ state: "matched_hidden", hint: data.hint });
+      }
     } catch (err: any) {
       console.error(err);
       setMatchStatus({ state: "no_match" });
@@ -63,7 +77,7 @@ export default function ResultsPage() {
       if (!res.ok) throw new Error(data.error || "Failed to reveal match.");
       
       setIsDecrypting(true);
-      setMatchStatus(data); // Will update to matched_revealed in the background
+      setMatchStatus({ state: "matched_revealed", matchedUser: data.matchedUser }); // Will update to matched_revealed in the background
       
       setTimeout(() => setDecryptionStage(1), 1500);
       setTimeout(() => setDecryptionStage(2), 3000);
