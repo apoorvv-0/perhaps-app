@@ -16,6 +16,7 @@ export default function PerhapsProfilePage() {
   const [college, setCollege] = useState("");
   const [batch, setBatch] = useState("");
   const [instagram, setInstagram] = useState("");
+  const [phase, setPhase] = useState("REGISTRATION");
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -30,6 +31,7 @@ export default function PerhapsProfilePage() {
         router.push("/verify-id");
         return;
       }
+      fetch("/api/event/status").then(r=>r.json()).then(d=>setPhase(d.phase));
       fetch("/api/profile").then(r => r.json()).then(data => {
         if (data.profile) {
           setFirstName(data.profile.firstName || "");

@@ -26,7 +26,7 @@ export default function AdminUsersPage() {
       if (!session || (session.globalRole !== 'SUPER_ADMIN' && !session.eventRoles?.includes('ADMIN'))) router.push('/dashboard');
       else {
         fetchUsers();
-        fetch('https://roviara-web.vercel.app/api/admin/config')
+        fetch('/api/admin/roviara-config')
           .then(res => res.json())
           .then(data => setHubConfig(data))
           .catch(() => console.error("Failed to load hub config"));
