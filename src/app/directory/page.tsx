@@ -19,7 +19,6 @@ export default function DirectoryPage() {
   const [picks, setPicks] = useState<string[]>([]);
   
   const [search, setSearch] = useState("");
-  const [filterGender, setFilterGender] = useState("");
   const [filterCollege, setFilterCollege] = useState("");
   const [filterBatch, setFilterBatch] = useState("");
 
@@ -153,12 +152,11 @@ export default function DirectoryPage() {
   const filtered = useMemo(() => {
     return profiles.filter(p => {
       const matchSearch = (p.firstName + " " + p.lastName).toLowerCase().includes(search.toLowerCase());
-      const matchGender = filterGender ? p.gender === filterGender : true;
       const matchCollege = filterCollege ? p.college === filterCollege : true;
       const matchBatch = filterBatch ? p.batch === filterBatch : true;
-      return matchSearch && matchGender && matchCollege && matchBatch;
+      return matchSearch && matchCollege && matchBatch;
     });
-  }, [profiles, search, filterGender, filterCollege, filterBatch]);
+  }, [profiles, search, filterCollege, filterBatch]);
 
   if (isLoading || phase === "LOADING") return <LoadingScreen />;
 
@@ -225,13 +223,6 @@ export default function DirectoryPage() {
 
         {/* Custom Pill Filters */}
         <div className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-2">
-          <div className="relative">
-             <select value={filterGender} onChange={e => setFilterGender(e.target.value)} className="bg-brand-charcoal border border-brand-burgundy/30 text-brand-taupe text-xs rounded-full px-5 py-2.5 outline-none whitespace-nowrap shadow-sm appearance-none focus:border-brand-rose/40">
-               <option value="">Gender</option>
-               <option value="MALE">Male</option>
-               <option value="FEMALE">Female</option>
-             </select>
-          </div>
           <div className="relative">
             <select value={filterCollege} onChange={e => setFilterCollege(e.target.value)} className="bg-brand-charcoal border border-brand-burgundy/30 text-brand-taupe text-xs rounded-full px-5 py-2.5 outline-none whitespace-nowrap shadow-sm appearance-none focus:border-brand-rose/40">
               <option value="">College</option>

@@ -9,6 +9,20 @@ import { getSession } from "@/lib/auth/session";
 import { getActiveEvent } from "@/lib/event-service";
 import { z } from "zod";
 
+
+async function calculateMaxChoices(userId: string, eventId: string) {
+  const coupons = await prisma.coupon.findMany({
+    where: { redeemedBy: userId, eventId, status: 'REDEEMED' }
+  });
+  const totalSpent = coupons.reduce((acc, c) => acc + c.faceValue, 0);
+  let maxChoicesAllowed = 3;
+  if (totalSpent >= 21600) maxChoicesAllowed = 15;
+  else if (totalSpent >= 16700) maxChoicesAllowed = 12;
+  else if (totalSpent >= 11800) maxChoicesAllowed = 9;
+  else if (totalSpent >= 6900) maxChoicesAllowed = 6;
+  return maxChoicesAllowed;
+}
+
 export async function GET() {
   const session = await getSession();
   if (session?.idVerificationStatus !== "APPROVED" || !session.profileComplete) {
@@ -17,7 +31,7 @@ export async function GET() {
 
   const event = await getActiveEvent();
   if (!event) {
-    return NextResponse.json({ choices: [], maxChoicesAllowed: 10 });
+    return NextResponse.json({ choices: [], maxChoicesAllowed: 3 });
   }
 
   const choices = await prisma.choice.findMany({
@@ -38,7 +52,8 @@ export async function GET() {
     },
   });
 
-  return NextResponse.json({ choices, maxChoicesAllowed: 10 });
+  const maxChoicesAllowed = await calculateMaxChoices(session.userId, event.id);
+  return NextResponse.json({ choices, maxChoicesAllowed });
 }
 
 export async function PUT(request: NextRequest) {
@@ -62,7 +77,7 @@ export async function PUT(request: NextRequest) {
   const bodyObj = body as { picks?: unknown; choices?: unknown };
   const rawList = bodyObj.choices ?? bodyObj.picks;
 
-  const maxAllowed = 10;
+  const maxAllowed = await calculateMaxChoices(session.userId, event.id);
 
   const dynSchema = z.array(z.string().uuid("Each pick must be a valid user ID")).max(maxAllowed, "You can only pick up to " + maxAllowed + " people.");
   const parsed = dynSchema.safeParse(rawList);

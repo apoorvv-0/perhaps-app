@@ -34,18 +34,13 @@ export async function GET(request: NextRequest) {
     gender: oppositeGender,
     status: "ACTIVE",
     eventRegistrations: { some: { eventId: event.id } },
-    ...(college ? { college } : {}),
-    ...(batch ? { batch } : {}),
-    ...(search ? { OR: [{ firstName: { contains: search } }, { lastName: { contains: search } }] } : {}),
   };
 
   const [profiles, total] = await Promise.all([
     prisma.user.findMany({
       where,
-      select: { id: true, firstName: true, lastName: true, college: true, batch: true },
+      select: { id: true, firstName: true, lastName: true, gender: true, college: true, batch: true },
       orderBy: [{ firstName: "asc" }, { lastName: "asc" }],
-      skip: (page - 1) * PAGE_SIZE,
-      take: PAGE_SIZE
     }),
     prisma.user.count({ where }),
   ]);
@@ -72,7 +67,7 @@ export async function GET(request: NextRequest) {
   }
 
   const enriched = profiles.map((p) => ({
-    id: p.id, gender: oppositeGender,
+    id: p.id, gender: p.gender,
     firstName: p.firstName, lastName: p.lastName, college: aliasMap.get(p.college || "") || p.college, batch: p.batch,
     alias: (nameCounts.get(`${p.firstName.toLowerCase()}|${p.lastName.toLowerCase()}`) ?? 0) > 1 ? (aliasMap.get(p.college || "") || p.college) : undefined,
   }));
@@ -80,7 +75,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     participants: enriched,
     eventPhase: event.status,
-    pagination: { total, page, pageSize: PAGE_SIZE, totalPages: Math.ceil(total / PAGE_SIZE) },
+    pagination: { total, page: 1, pageSize: total, totalPages: 1 },
   });
 }
 
