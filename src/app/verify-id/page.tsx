@@ -117,24 +117,26 @@ export default function VerifyIdPage() {
         <p className="text-brand-taupe/80 max-w-sm font-light leading-relaxed mb-8">
           The Oracle is manually reviewing your College ID. Check back in a little while!
         </p>
-        <button onClick={logout} className="text-brand-taupe/50 hover:text-brand-blush text-xs transition-colors mb-4">
-          Log out / Switch Account
-        </button>
-        <button
-          onClick={async () => {
-            if (confirm("Are you sure you want to permanently delete your account? This cannot be undone.")) {
-              try {
-                await fetch("/api/profile", { method: "DELETE" });
-                await logout();
-              } catch (e) {
-                alert("Failed to delete account");
+        <div className="flex flex-col gap-4 w-full mt-4">
+          <button onClick={logout} className="w-full py-4 bg-brand-charcoal border border-brand-taupe/20 rounded-xl text-brand-taupe hover:text-brand-blush transition-colors font-medium">
+            Log out / Switch Account
+          </button>
+          <button
+            onClick={async () => {
+              if (prompt("Type 'delete' to permanently delete your account:") === 'delete') {
+                try {
+                  await fetch("/api/profile", { method: "DELETE" });
+                  await logout();
+                } catch (e) {
+                  alert("Failed to delete account");
+                }
               }
-            }
-          }}
-          className="text-red-500/50 hover:text-red-400 text-xs underline transition-colors"
-        >
-          Permanently Delete Account
-        </button>
+            }}
+            className="w-full py-4 bg-red-950/30 border border-red-900/50 rounded-xl text-red-500 hover:bg-red-900/50 hover:text-red-300 transition-colors font-medium"
+          >
+            Permanently Delete Account
+          </button>
+        </div>
       </div>
     );
   }
@@ -231,13 +233,13 @@ export default function VerifyIdPage() {
           </button>
         </form>
 
-        <div className="mt-8 text-center flex flex-col gap-4">
-          <button onClick={logout} className="text-brand-taupe/50 hover:text-brand-blush text-xs transition-colors">
+        <div className="mt-8 text-center flex flex-col gap-4 w-full">
+          <button onClick={logout} className="w-full py-4 bg-[#111] border border-brand-taupe/10 rounded-xl text-brand-taupe hover:text-brand-blush hover:border-brand-taupe/30 transition-colors font-medium">
             Log out / Switch Account
           </button>
           <button
             onClick={async () => {
-              if (confirm("Are you sure you want to permanently delete your account? This cannot be undone.")) {
+              if (prompt("Type 'delete' to permanently delete your account:") === 'delete') {
                 try {
                   await fetch("/api/profile", { method: "DELETE" });
                   await logout();
@@ -246,7 +248,7 @@ export default function VerifyIdPage() {
                 }
               }
             }}
-            className="text-red-500/50 hover:text-red-400 text-xs underline transition-colors"
+            className="w-full py-4 bg-red-950/30 border border-red-900/50 rounded-xl text-red-500 hover:bg-red-900/50 hover:text-red-300 transition-colors font-medium"
           >
             Permanently Delete Account
           </button>

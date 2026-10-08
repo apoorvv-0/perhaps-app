@@ -35,7 +35,8 @@ export async function GET() {
   return NextResponse.json({ 
     session: {
       ...session,
-      eventRoles
+      eventRoles,
+      phone: user.phone
     }
   });
 }

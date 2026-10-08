@@ -12,6 +12,7 @@ type MatchStatus =
   | { state: "loading" }
   | { state: "not_open" }
   | { state: "no_match" }
+  | { state: "error" }
   | { state: "matched_hidden"; hint: { college: string; batch: string } }
   | { state: "matched_revealed"; matchedUser: { firstName: string; lastName: string; instagramHandle: string; college: string; batch: string } };
 
@@ -58,9 +59,9 @@ export default function ResultsPage() {
         setMatchStatus({ state: "matched_hidden", hint: data.hint });
       }
     } catch (err: any) {
-      console.error(err);
-      setMatchStatus({ state: "no_match" });
-    }
+        console.error(err);
+        setMatchStatus({ state: "error" });
+      }
   };
 
   const handleReveal = async (e: React.FormEvent) => {
@@ -118,7 +119,21 @@ export default function ResultsPage() {
 
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center w-full max-w-lg mx-auto px-6 pt-8 pb-12">
         
-        {/* State: Not Open */}
+                  {/* State: Error */}
+          {matchStatus.state === "error" && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full text-center flex flex-col items-center">
+              <div className="w-20 h-20 mb-8 opacity-40 text-red-400">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-full h-full"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              </div>
+              <h2 className="font-mono text-2xl font-normal tracking-[0.2em] mb-4 text-red-400">CONNECTION FAILED</h2>
+              <p className="text-brand-taupe/60 text-xs uppercase tracking-widest max-w-[280px] mx-auto leading-loose mb-12">We couldn"t reach the oracle. Please check your internet connection.</p>
+              <button onClick={fetchResult} className="text-brand-rose text-xs font-mono uppercase tracking-[0.2em] border-b border-brand-rose/30 pb-1 hover:text-brand-blush hover:border-brand-blush transition-colors">
+                Retry Connection
+              </button>
+            </motion.div>
+          )}
+
+          {/* State: Not Open */}
         {matchStatus.state === "not_open" && (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: "easeOut" }} className="w-full text-center flex flex-col items-center">
             <div className="w-24 h-24 rounded-full border border-brand-taupe/10 flex items-center justify-center mb-8 bg-brand-wine/50 backdrop-blur-sm shadow-[0_0_40px_rgba(0,0,0,0.3)] relative">
@@ -305,3 +320,5 @@ export default function ResultsPage() {
     </div>
   );
 }
+
+

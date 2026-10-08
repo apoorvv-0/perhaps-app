@@ -17,7 +17,7 @@ export async function GET() {
 
   const event = await getActiveEvent();
   if (!event) {
-    return NextResponse.json({ choices: [], maxChoicesAllowed: 3 });
+    return NextResponse.json({ choices: [], maxChoicesAllowed: 10 });
   }
 
   const choices = await prisma.choice.findMany({
@@ -38,17 +38,7 @@ export async function GET() {
     },
   });
 
-  const coupons = await prisma.coupon.findMany({
-    where: { redeemedBy: session.userId, eventId: event.id, status: 'REDEEMED' }
-  });
-  const totalSpent = coupons.reduce((acc, c) => acc + c.faceValue, 0);
-  let maxChoicesAllowed = 3;
-  if (totalSpent >= 21600) maxChoicesAllowed = 15;
-  else if (totalSpent >= 16700) maxChoicesAllowed = 12;
-  else if (totalSpent >= 11800) maxChoicesAllowed = 9;
-  else if (totalSpent >= 6900) maxChoicesAllowed = 6;
-
-  return NextResponse.json({ choices, maxChoicesAllowed });
+  return NextResponse.json({ choices, maxChoicesAllowed: 10 });
 }
 
 export async function PUT(request: NextRequest) {
@@ -72,17 +62,9 @@ export async function PUT(request: NextRequest) {
   const bodyObj = body as { picks?: unknown; choices?: unknown };
   const rawList = bodyObj.choices ?? bodyObj.picks;
 
-  const coupons = await prisma.coupon.findMany({
-    where: { redeemedBy: session.userId, eventId: event.id, status: 'REDEEMED' }
-  });
-  const totalSpent = coupons.reduce((acc, c) => acc + c.faceValue, 0);
-  let maxAllowed = 3;
-  if (totalSpent >= 21600) maxAllowed = 15;
-  else if (totalSpent >= 16700) maxAllowed = 12;
-  else if (totalSpent >= 11800) maxAllowed = 9;
-  else if (totalSpent >= 6900) maxAllowed = 6;
+  const maxAllowed = 10;
 
-  const dynSchema = z.array(z.string().uuid("Each pick must be a valid user ID")).max(maxAllowed, `You can only pick up to ${maxAllowed} people.`);
+  const dynSchema = z.array(z.string().uuid("Each pick must be a valid user ID")).max(maxAllowed, "You can only pick up to " + maxAllowed + " people.");
   const parsed = dynSchema.safeParse(rawList);
   
   if (!parsed.success) {
@@ -90,13 +72,6 @@ export async function PUT(request: NextRequest) {
   }
 
   const pickedIds = parsed.data;
-
-  const reg = await prisma.eventRegistration.findUnique({ where: { eventId_userId: { eventId: event.id, userId: session.userId } } });
-  const isExempt = reg?.minChoiceExempt ?? false;
-
-  if (!isExempt && (pickedIds.length === 1 || pickedIds.length === 2)) {
-    return NextResponse.json({ error: "You must select 0, or at least 3 people. 1 or 2 is not allowed." }, { status: 400 });
-  }
 
   const uniqueIds = Array.from(new Set(pickedIds));
   if (uniqueIds.length !== pickedIds.length) {
@@ -150,3 +125,8 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+
+
+export const dynamic = "force-dynamic";
+

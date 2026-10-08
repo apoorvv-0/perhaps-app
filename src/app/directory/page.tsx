@@ -46,7 +46,7 @@ export default function DirectoryPage() {
       if (session.idVerificationStatus !== "APPROVED") { router.push("/verify-id"); return; }
       if (!session.profileComplete) { router.push("/profile"); return; }
       fetchData();
-      fetch('https://roviara-web.vercel.app/api/admin/config')
+      fetch(`${process.env.NEXT_PUBLIC_ROVIARA_URL}/api/admin/config`)
         .then(res => res.json())
         .then(data => setHubConfig(data))
         .catch(() => console.error("Failed to load hub config"));

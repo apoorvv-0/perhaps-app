@@ -83,3 +83,6 @@ export async function GET(request: NextRequest) {
     pagination: { total, page, pageSize: PAGE_SIZE, totalPages: Math.ceil(total / PAGE_SIZE) },
   });
 }
+
+export const dynamic = "force-dynamic";
+
