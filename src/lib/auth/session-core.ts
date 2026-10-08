@@ -8,7 +8,7 @@ import { SignJWT, jwtVerify } from "jose";
 export interface SessionPayload {
   userId: string;
   globalRole: "USER" | "SUPER_ADMIN";
-  phoneVerified: boolean;
+  idVerificationStatus: string;
   profileComplete: boolean;
   /** Intermediate state: Google linked but phone not yet verified */
   pendingPhoneLink?: boolean;

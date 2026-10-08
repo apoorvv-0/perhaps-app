@@ -46,14 +46,14 @@ export async function POST(req: NextRequest) {
       where: { id: user.id },
       data: {
         phone: firebasePhone,
-        phoneVerified: true,
+        idVerificationStatus: 'APPROVED',
       }
     });
 
     // Update the JWT session
     await setSessionCookie({
       ...session,
-      phoneVerified: true,
+      idVerificationStatus: 'APPROVED',
     });
 
     return NextResponse.json({ ok: true, phone: firebasePhone });

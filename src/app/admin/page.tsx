@@ -278,8 +278,90 @@ export default function AdminDashboardPage() {
           </div>
           <p className="text-[11px] text-brand-taupe mt-3">If set, registrations will automatically block users from joining after this time, while the phase remains Open.</p>
         </div>
+
+        {/* Verification Queue */}
+        <VerificationQueue />
+
       </div>
       <BottomTabBar />
+    </div>
+  );
+}
+
+function VerificationQueue() {
+  const [queue, setQueue] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchQueue = async () => {
+    try {
+      const res = await fetch("/api/admin/verification-queue");
+      const data = await res.json();
+      if (res.ok) setQueue(data.queue || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchQueue();
+  }, []);
+
+  const handleAction = async (userId: string, action: string) => {
+    if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+    try {
+      const res = await fetch("/api/admin/verification-queue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, action })
+      });
+      if (res.ok) {
+        setQueue(q => q.filter(u => u.id !== userId));
+      } else {
+        alert("Action failed");
+      }
+    } catch (e) {
+      alert("Error occurred");
+    }
+  };
+
+  if (loading) return <div className="mt-8 text-center text-brand-taupe">Loading queue...</div>;
+
+  return (
+    <div className="bg-brand-charcoal border border-brand-burgundy/50 rounded-3xl p-6 mb-6">
+      <h2 className="text-xl font-playfair font-bold text-brand-blush mb-4">Verification Queue ({queue.length})</h2>
+      {queue.length === 0 ? (
+        <div className="p-4 bg-brand-wine/50 rounded-2xl text-center text-brand-taupe/70 text-sm">
+          No pending users to verify.
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {queue.map(user => (
+            <div key={user.id} className="p-4 bg-brand-wine/50 rounded-2xl flex flex-col sm:flex-row gap-4 border border-brand-burgundy/30">
+              {user.idCardUrl ? (
+                <img src={user.idCardUrl} alt="ID Card" className="w-full sm:w-40 h-28 object-cover rounded-xl bg-black border border-brand-burgundy/50" />
+              ) : (
+                <div className="w-full sm:w-40 h-28 bg-black rounded-xl border border-brand-burgundy/50 flex items-center justify-center text-brand-taupe/50 text-xs">No Image</div>
+              )}
+              
+              <div className="flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="font-bold text-lg text-brand-blush">{user.firstName} {user.lastName}</h3>
+                  <p className="text-brand-taupe text-sm mb-1">{user.college} - {user.batch}</p>
+                  <p className="text-brand-rose text-sm font-mono">{user.phone}</p>
+                </div>
+                
+                <div className="flex gap-2 mt-3 sm:mt-0">
+                  <button onClick={() => handleAction(user.id, "APPROVE")} className="flex-1 bg-green-500/10 text-green-400 border border-green-500/20 py-2 rounded-xl text-xs font-bold hover:bg-green-500/20 transition-colors">APPROVE</button>
+                  <button onClick={() => handleAction(user.id, "REJECT")} className="flex-1 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 py-2 rounded-xl text-xs font-bold hover:bg-yellow-500/20 transition-colors">REJECT</button>
+                  <button onClick={() => handleAction(user.id, "SUSPEND")} className="flex-1 bg-red-500/10 text-red-400 border border-red-500/20 py-2 rounded-xl text-xs font-bold hover:bg-red-500/20 transition-colors">SUSPEND</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

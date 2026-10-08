@@ -31,7 +31,7 @@ export default function ResultsPage() {
   useEffect(() => {
     if (!isLoading) {
       if (!session) router.push("/");
-      else if (!session.phoneVerified) router.push("/verify-phone");
+      else if (!session.idVerificationStatus === "APPROVED") router.push("/verify-id");
       else if (!session.profileComplete) router.push("/profile");
       else fetchResult();
     }

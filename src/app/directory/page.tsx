@@ -41,7 +41,7 @@ export default function DirectoryPage() {
   useEffect(() => {
     if (!isLoading) {
       if (!session) { router.push("/"); return; }
-      if (!session.phoneVerified) { router.push("/verify-phone"); return; }
+      if (!session.idVerificationStatus === "APPROVED") { router.push("/verify-id"); return; }
       if (!session.profileComplete) { router.push("/profile"); return; }
       fetchData();
     }

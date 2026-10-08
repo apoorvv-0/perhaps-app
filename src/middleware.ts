@@ -50,8 +50,8 @@ export async function middleware(request: NextRequest) {
     if (!session) {
       return NextResponse.redirect(new URL("/", request.url));
     }
-    if (!session.phoneVerified) {
-      return NextResponse.redirect(new URL("/verify-phone", request.url));
+    if (!session.idVerificationStatus === "APPROVED") {
+      return NextResponse.redirect(new URL("/verify-id", request.url));
     }
     if (!session.profileComplete && !pathname.startsWith("/profile")) {
       return NextResponse.redirect(new URL("/profile", request.url));
@@ -60,7 +60,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── Semi-protected ───────────────────────────────────────────
-  const SEMI_PROTECTED = ["/verify-phone"];
+  const SEMI_PROTECTED = ["/verify-id"];
   if (SEMI_PROTECTED.some((r) => pathname.startsWith(r))) {
     if (!session) return NextResponse.redirect(new URL("/", request.url));
     return NextResponse.next();
@@ -77,7 +77,7 @@ export const config = {
     "/results/:path*",
     "/profile/:path*",
     "/leaderboard/:path*",
-    "/verify-phone/:path*",
+    "/verify-id/:path*",
     "/admin/:path*",
     "/cashier/:path*",
     "/superadmin/:path*",
