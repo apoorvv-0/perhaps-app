@@ -3,13 +3,24 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import LoadingScreen from "@/components/LoadingScreen";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
+import { Suspense } from "react";
 
-export default function PerhapsLandingPage() {
+function LandingContent() {
   const { session, isLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const err = searchParams.get("error");
+    if (err === "incomplete_profile") {
+      alert("Please complete your profile on Roviara Hub before signing in!");
+    } else if (err === "account_deleted") {
+      alert("Your account was successfully deleted.");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     setMounted(true);
@@ -109,5 +120,13 @@ export default function PerhapsLandingPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function PerhapsLandingPage() {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <LandingContent />
+    </Suspense>
   );
 }
