@@ -10,7 +10,7 @@ export default function PerhapsLanding() {
 
   useEffect(() => {
     if (!isLoading && session) {
-      if (session.globalRole === 'SUPER_ADMIN') router.push('/roviara');
+      if (session.globalRole === 'SUPER_ADMIN') router.push('/admin');
       else router.push('/dashboard');
     }
   }, [session, isLoading, router]);
