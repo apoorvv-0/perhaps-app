@@ -37,7 +37,7 @@ const VALID_NEXT: Record<EventPhase, EventPhase[]> = {
 };
 
 export default function AdminDashboardPage() {
-  const { session, isLoading } = useAuth();
+  const { session, isLoading, logout } = useAuth();
   const router = useRouter();
   
   const [eventData, setEventData] = useState<any>(null);
@@ -117,8 +117,18 @@ export default function AdminDashboardPage() {
     }
   };
 
-  if (isLoading || !eventData) {
+  if (isLoading) {
     return <div className="min-h-screen bg-[#050505] flex items-center justify-center"><div className="w-8 h-8 border-2 border-brand-rose border-t-transparent rounded-full animate-spin" /></div>;
+  }
+
+  if (!eventData) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-brand-taupe">
+        <h1 className="text-2xl font-bold mb-4">No Active Event</h1>
+        <p className="mb-8">There are currently no active events in the database.</p>
+        <button onClick={logout} className="text-brand-rose underline">Log Out</button>
+      </div>
+    );
   }
 
   const phase: EventPhase = eventData.status;

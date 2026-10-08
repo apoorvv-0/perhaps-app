@@ -187,6 +187,15 @@ export default function VerifyPhone() {
             </button>
           </form>
         )}
+        
+        <div className="mt-8 text-center">
+          <button
+            onClick={useAuth().logout}
+            className="text-brand-taupe/50 hover:text-red-400 text-xs transition-colors"
+          >
+            Log out / Switch Account
+          </button>
+        </div>
       </div>
     </div>
   );
