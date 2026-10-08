@@ -89,6 +89,15 @@ export async function GET(request: Request) {
       profileComplete: true
     });
 
+      const event = await getActiveEvent();
+    if (event && event.status === "REGISTRATION_OPEN" && localUser.idVerificationStatus === "APPROVED") {
+      await prisma.eventRegistration.upsert({
+        where: { eventId_userId: { eventId: event.id, userId: localUser.id } },
+        create: { eventId: event.id, userId: localUser.id },
+        update: {}
+      });
+    }
+
     // 5. Redirect into the app
     return NextResponse.redirect(new URL("/dashboard", request.url));
 

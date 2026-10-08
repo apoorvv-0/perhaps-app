@@ -54,6 +54,18 @@ export async function POST(req: NextRequest) {
       }
     });
 
+    
+    if (newStatus === "APPROVED") {
+      const event = await getActiveEvent();
+      if (event && event.status === "REGISTRATION_OPEN") {
+        await prisma.eventRegistration.upsert({
+          where: { eventId_userId: { eventId: event.id, userId } },
+          create: { eventId: event.id, userId },
+          update: {}
+        });
+      }
+    }
+
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

@@ -78,6 +78,16 @@ export async function PUT(request: NextRequest) {
     }
   });
 
+  if (event && event.status === "REGISTRATION_OPEN" && existing?.idVerificationStatus === "APPROVED") {
+    if (!event.registrationEndAt || new Date() <= new Date(event.registrationEndAt)) {
+      await prisma.eventRegistration.upsert({
+        where: { eventId_userId: { eventId: event.id, userId: session.userId } },
+        create: { eventId: event.id, userId: session.userId },
+        update: {},
+      });
+    }
+  }
+
   await setSessionCookie({ ...session, profileComplete: true });
   return NextResponse.json({ ok: true, profile: user });
 }
