@@ -44,7 +44,12 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL("/?error=incomplete_profile", request.url));
     }
 
-    // 3. Upsert the user into the local database
+    // 3. Prevent deleted users from signing in
+    const existingLocalUser = await prisma.user.findUnique({ where: { roviaraId } });
+    if (existingLocalUser?.status === "DELETED") {
+      return NextResponse.redirect(new URL("/?error=account_deleted", request.url));
+    }
+
     const userEmail = roviaraData.email || profile.email || null;
     
     const localUser = await prisma.user.upsert({

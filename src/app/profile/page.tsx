@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -201,7 +201,7 @@ export default function PerhapsProfilePage() {
           
           <button
             onClick={async () => {
-              if (confirm("Are you sure you want to permanently delete your account? This cannot be undone.")) {
+              const confirmation = prompt('Type "delete" to permanently delete your account. This cannot be undone.'); if (confirmation?.toLowerCase() === 'delete') {
                 try {
                   await fetch("/api/profile", { method: "DELETE" });
                   await logout();

@@ -103,8 +103,19 @@ export async function DELETE(req: NextRequest) {
   const session = await verifyToken(sessionToken);
   if (!session) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   
-  await prisma.user.delete({
-    where: { id: session.userId }
+  const user = await prisma.user.findUnique({ where: { id: session.userId } });
+  
+  if (user?.roviaraId) {
+    const roviaraUrl = process.env.NEXT_PUBLIC_ROVIARA_URL || "https://roviara-web.vercel.app";
+    await fetch(`${roviaraUrl}/api/sync/user?roviaraId=${user.roviaraId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${process.env.INTER_APP_SECRET}` }
+    }).catch(e => console.error("Roviara delete failed", e));
+  }
+
+  await prisma.user.update({
+    where: { id: session.userId },
+    data: { status: "DELETED" }
   });
   
   return NextResponse.json({ success: true });

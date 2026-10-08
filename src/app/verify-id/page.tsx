@@ -9,7 +9,7 @@ export default function VerifyIdPage() {
   const { session, isLoading, logout, refreshSession } = useAuth();
   const router = useRouter();
 
-  const [phone, setPhone] = useState("+91");
+  const [phone, setPhone] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
