@@ -45,11 +45,14 @@ export async function GET(request: Request) {
     }
 
     // 3. Upsert the user into the local database
+    const userEmail = roviaraData.email || profile.email || null;
+    
     const localUser = await prisma.user.upsert({
       where: { roviaraId },
       update: {
         firstName: profile.firstName,
         lastName: profile.lastName,
+        email: userEmail,
         instagramHandle: profile.instagramHandle,
         gender: profile.gender,
         college: profile.college,
@@ -61,6 +64,7 @@ export async function GET(request: Request) {
         roviaraId,
         firstName: profile.firstName,
         lastName: profile.lastName,
+        email: userEmail,
         instagramHandle: profile.instagramHandle,
         gender: profile.gender,
         college: profile.college,

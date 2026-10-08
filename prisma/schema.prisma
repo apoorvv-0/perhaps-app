@@ -59,6 +59,7 @@ model User {
   roviaraId       String     @unique // Links to Roviara Hub User ID
   firstName       String
   lastName        String
+  email           String?
   instagramHandle String?
   gender          Gender
   college         String
