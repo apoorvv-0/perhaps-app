@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -391,7 +391,9 @@ function VerificationQueue() {
           {queue.map(user => (
             <div key={user.id} className="p-4 bg-black/20 rounded-2xl flex flex-col gap-4 border border-brand-burgundy/30 hover:border-brand-burgundy/50 transition-colors">
               {user.idCardUrl ? (
-                <img src={user.idCardUrl} alt="ID Card" className="w-full h-40 sm:h-48 object-cover rounded-xl bg-black border border-brand-burgundy/50" />
+                <a href={user.idCardUrl} target="_blank" rel="noopener noreferrer" className="block w-full">
+                  <img src={user.idCardUrl} alt="ID Card" className="w-full h-40 sm:h-48 object-cover rounded-xl bg-black border border-brand-burgundy/50 hover:opacity-80 transition-opacity" />
+                </a>
               ) : (
                 <div className="w-full h-40 sm:h-48 bg-black/50 rounded-xl border border-brand-burgundy/50 flex flex-col items-center justify-center text-brand-taupe/50 gap-2">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
