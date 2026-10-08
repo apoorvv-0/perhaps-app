@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -194,7 +194,7 @@ export default function VerifyIdPage() {
             <input
               type="file"
               accept="image/*"
-              capture="environment"
+              
               ref={fileInputRef}
               onChange={handleImageCapture}
               className="hidden"

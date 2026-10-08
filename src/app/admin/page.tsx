@@ -58,7 +58,7 @@ export default function AdminDashboardPage() {
 
   const fetchAdminData = async () => {
     try {
-      const res = await fetch("/api/admin/event");
+      const res = await fetch("/api/admin/event-status");
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load event data");
       setEventData(data.event);
@@ -82,7 +82,7 @@ export default function AdminDashboardPage() {
   const handleUpdateTimer = async () => {
     setActionLoading(true);
     try {
-      const res = await fetch("/api/admin/event", {
+      const res = await fetch("/api/admin/event-status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "UPDATE_TIMER", eventId: eventData.id, registrationEndAt: registrationEndAt ? new Date(registrationEndAt).toISOString() : null }),
@@ -98,10 +98,10 @@ export default function AdminDashboardPage() {
   };
 
   const handlePhaseChange = async (newPhase: string) => {
-    if (!confirm(\Are you sure you want to move to \?\)) return;
+    if (!confirm(`Are you sure you want to move to ${newPhase}?`)) return;
     setActionLoading(true);
     try {
-      const res = await fetch("/api/admin/event", {
+      const res = await fetch("/api/admin/event-status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "UPDATE_PHASE", eventId: eventData.id, nextPhase: newPhase }),
@@ -176,7 +176,7 @@ export default function AdminDashboardPage() {
             </div>
             <div className="bg-brand-charcoal/50 backdrop-blur-md border border-brand-burgundy/40 rounded-2xl p-5 hover:border-green-500/30 transition-colors">
               <p className="text-brand-taupe text-xs font-bold uppercase tracking-wider mb-2">Revenue</p>
-              <p className="text-3xl font-mono font-bold text-green-400">₹{stats.totalRevenueRupees}</p>
+              <p className="text-3xl font-mono font-bold text-green-400">â‚¹{stats.totalRevenueRupees}</p>
             </div>
           </div>
         )}
@@ -203,7 +203,7 @@ export default function AdminDashboardPage() {
                             onClick={() => handlePhaseChange(opt)}
                             disabled={actionLoading}
                             className="p-4 rounded-xl border flex items-center justify-between transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:scale-100"
-                            style={{ backgroundColor: meta.bg, borderColor: \\40\, color: meta.color }}
+                            style={{ backgroundColor: meta.bg, borderColor: `${meta.bg}40`, color: meta.color }}
                           >
                             <span className="font-medium text-sm">{meta.label}</span>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
@@ -270,7 +270,7 @@ export default function AdminDashboardPage() {
                           try {
                             const r = await fetch("/api/admin/matching/dry-run", { method: "POST" });
                             const d = await r.json();
-                            alert(\Found \ mutual matches!\);
+                            alert(`Found ${d.stats?.mutualMatches || 0} mutual matches!`);
                           } finally { setActionLoading(false); }
                         }
                       }} 
@@ -300,7 +300,7 @@ export default function AdminDashboardPage() {
                             let d;
                             try { d = JSON.parse(text); } catch { throw new Error("Invalid response"); }
                             if (!r.ok) throw new Error(d.error || "Failed to commit");
-                            alert(\Committed successfully! Found \ matches.\);
+                            alert(`Committed successfully! Found ${d.stats?.mutualMatches || 0} matches.`);
                             window.location.reload();
                           } catch (e: any) {
                             alert("Error: " + e.message);
@@ -353,7 +353,7 @@ function VerificationQueue() {
   }, []);
 
   const handleAction = async (userId: string, action: string) => {
-    if (!confirm(\Are you sure you want to \ this user?\)) return;
+    if (!confirm(`Are you sure you want to ${action} this user?`)) return;
     try {
       const res = await fetch("/api/admin/verification-queue", {
         method: "POST",

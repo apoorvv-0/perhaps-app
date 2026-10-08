@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -17,7 +17,7 @@ export default function MutualsRouter() {
       return;
     }
     if (!isLoading && session) {
-      fetch("/api/admin/event")
+      fetch("/api/admin/event-status")
         .then(res => res.json())
         .then(data => {
           setPhase(data.event?.status || "UNKNOWN");
