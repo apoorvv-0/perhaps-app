@@ -44,11 +44,9 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL("/?error=incomplete_profile", request.url));
     }
 
-    // 3. Prevent deleted users from signing in
+    // 3. Revive deleted users
     const existingLocalUser = await prisma.user.findUnique({ where: { roviaraId } });
-    if (existingLocalUser?.status === "DELETED") {
-      return NextResponse.redirect(new URL("/?error=account_deleted", request.url));
-    }
+    const isRevived = existingLocalUser?.status === "DELETED";
 
     const userEmail = roviaraData.email || profile.email || null;
     
@@ -58,13 +56,15 @@ export async function GET(request: Request) {
         firstName: profile.firstName,
         lastName: profile.lastName,
         email: userEmail,
-        phone: roviaraData.phoneNumber,
+        phone: isRevived ? null : roviaraData.phoneNumber,
         instagramHandle: profile.instagramHandle,
         gender: profile.gender,
         college: profile.college,
         batch: profile.batch,
         globalRole: roviaraData.globalRole,
-        status: roviaraData.status
+        status: isRevived ? "ACTIVE" : roviaraData.status,
+        idVerificationStatus: isRevived ? "UNVERIFIED" : undefined,
+        idCardUrl: isRevived ? null : undefined,
       },
       create: {
         roviaraId,

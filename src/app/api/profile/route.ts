@@ -116,7 +116,13 @@ export async function DELETE(req: NextRequest) {
   await prisma.user.update({
     where: { id: session.userId },
     data: { status: "DELETED" }
-  });
+    });
+
+    // Completely erase their presence from the event
+    await prisma.choice.deleteMany({ where: { pickerId: session.userId } });
+    await prisma.choice.deleteMany({ where: { pickedId: session.userId } });
+    await prisma.match.deleteMany({ where: { OR: [{ user1Id: session.userId }, { user2Id: session.userId }] } });
+
   
   return NextResponse.json({ success: true });
 }
