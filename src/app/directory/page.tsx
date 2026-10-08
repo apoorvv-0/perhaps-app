@@ -35,6 +35,8 @@ export default function DirectoryPage() {
   const [couponError, setCouponError] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
 
+  const [hubConfig, setHubConfig] = useState<any>({ colleges: [] });
+
   const initialLoadDone = useRef(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -44,6 +46,10 @@ export default function DirectoryPage() {
       if (session.idVerificationStatus !== "APPROVED") { router.push("/verify-id"); return; }
       if (!session.profileComplete) { router.push("/profile"); return; }
       fetchData();
+      fetch('https://roviara-web.vercel.app/api/admin/config')
+        .then(res => res.json())
+        .then(data => setHubConfig(data))
+        .catch(() => console.error("Failed to load hub config"));
     }
   }, [session, isLoading, router]);
 
@@ -65,6 +71,11 @@ export default function DirectoryPage() {
     } catch {
       setPhase("ERROR");
     }
+  };
+
+  const getCollegeAlias = (collegeName: string) => {
+    const found = hubConfig.colleges?.find((c: any) => c.name === collegeName);
+    return found?.alias || collegeName;
   };
 
   
@@ -224,7 +235,7 @@ export default function DirectoryPage() {
           <div className="relative">
             <select value={filterCollege} onChange={e => setFilterCollege(e.target.value)} className="bg-brand-charcoal border border-brand-burgundy/30 text-brand-taupe text-xs rounded-full px-5 py-2.5 outline-none whitespace-nowrap shadow-sm appearance-none focus:border-brand-rose/40">
               <option value="">College</option>
-              {colleges.map(c => <option key={c} value={c}>{c}</option>)}
+              {colleges.map(c => <option key={c} value={c}>{getCollegeAlias(c)}</option>)}
             </select>
           </div>
           <div className="relative">
@@ -263,7 +274,7 @@ export default function DirectoryPage() {
                   {p.firstName} {p.lastName} {p.alias && <span className="text-brand-taupe font-inter text-sm italic ml-1">"{p.alias}"</span>}
                 </h3>
                 <div className="flex items-center flex-wrap gap-1.5 text-xs text-brand-taupe mt-1 font-light">
-                  <span>{p.college}</span>
+                  <span>{getCollegeAlias(p.college)}</span>
                   <span className="w-1 h-1 rounded-full bg-brand-burgundy/60" />
                   <span>'{(p.batch || "").slice(-2)}</span>
                 </div>

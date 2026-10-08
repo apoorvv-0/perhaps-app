@@ -13,6 +13,7 @@ export default function AdminUsersPage() {
   const [saving, setSaving] = useState<string | null>(null);
   const [editingUser, setEditingUser] = useState<any | null>(null);
   const [editForm, setEditForm] = useState<any>({});
+  const [hubConfig, setHubConfig] = useState<any>({ colleges: [], batches: [] });
 
   const filteredUsers = users.filter(u => 
     `${u.firstName} ${u.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
@@ -23,7 +24,13 @@ export default function AdminUsersPage() {
   useEffect(() => {
     if (!isLoading) {
       if (!session || (session.globalRole !== 'SUPER_ADMIN' && !session.eventRoles?.includes('ADMIN'))) router.push('/dashboard');
-      else fetchUsers();
+      else {
+        fetchUsers();
+        fetch('https://roviara-web.vercel.app/api/admin/config')
+          .then(res => res.json())
+          .then(data => setHubConfig(data))
+          .catch(() => console.error("Failed to load hub config"));
+      }
     }
   }, [session, isLoading, router]);
 
@@ -199,8 +206,14 @@ export default function AdminUsersPage() {
             <div className="flex flex-col gap-3 mb-6">
               <input className="bg-transparent border border-brand-burgundy rounded-xl px-4 py-3 text-sm focus:border-brand-rose/50 outline-none transition" placeholder="First Name" value={editForm.firstName || ''} onChange={e => setEditForm({...editForm, firstName: e.target.value})} />
               <input className="bg-transparent border border-brand-burgundy rounded-xl px-4 py-3 text-sm focus:border-brand-rose/50 outline-none transition" placeholder="Last Name" value={editForm.lastName || ''} onChange={e => setEditForm({...editForm, lastName: e.target.value})} />
-              <input className="bg-transparent border border-brand-burgundy rounded-xl px-4 py-3 text-sm focus:border-brand-rose/50 outline-none transition" placeholder="College" value={editForm.college || ''} onChange={e => setEditForm({...editForm, college: e.target.value})} />
-              <input className="bg-transparent border border-brand-burgundy rounded-xl px-4 py-3 text-sm focus:border-brand-rose/50 outline-none transition" placeholder="Batch" value={editForm.batch || ''} onChange={e => setEditForm({...editForm, batch: e.target.value})} />
+              <select className="bg-brand-wine border border-brand-burgundy rounded-xl px-4 py-3 text-sm focus:border-brand-rose/50 outline-none transition" value={editForm.college || ''} onChange={e => setEditForm({...editForm, college: e.target.value})}>
+                <option value="">Select College</option>
+                {hubConfig?.colleges?.map((c: any) => <option key={c.name || c} value={c.name || c}>{c.name || c}</option>)}
+              </select>
+              <select className="bg-brand-wine border border-brand-burgundy rounded-xl px-4 py-3 text-sm focus:border-brand-rose/50 outline-none transition" value={editForm.batch || ''} onChange={e => setEditForm({...editForm, batch: e.target.value})}>
+                <option value="">Select Batch</option>
+                {hubConfig?.batches?.map((b: any) => <option key={b} value={b}>{b}</option>)}
+              </select>
               <select className="bg-brand-wine border border-brand-burgundy rounded-xl px-4 py-3 text-sm focus:border-brand-rose/50 outline-none transition" value={editForm.gender || ''} onChange={e => setEditForm({...editForm, gender: e.target.value})}>
                 <option value="MALE">MALE</option>
                 <option value="FEMALE">FEMALE</option>
