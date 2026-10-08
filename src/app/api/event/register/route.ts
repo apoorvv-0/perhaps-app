@@ -5,7 +5,9 @@ import { getActiveEvent } from "@/lib/event-service";
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session || session.idVerificationStatus !== "APPROVED") {
+    return NextResponse.json({ error: "Unauthorized or unverified" }, { status: 401 });
+  }
 
   const event = await getActiveEvent();
   if (!event || event.status !== "REGISTRATION_OPEN") {
