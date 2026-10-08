@@ -190,13 +190,29 @@ export default function PerhapsProfilePage() {
         </div>
 
         {/* Save */}
-        <div className="pt-4">
+        <div className="pt-4 flex flex-col gap-4">
           <button
             onClick={handleSave}
             disabled={loading}
             className="w-full py-5 rounded-full font-semibold text-brand-charcoal bg-gradient-to-r from-brand-blush to-brand-rose active:scale-[0.98] transition-all text-base tracking-wide disabled:opacity-60"
           >
             {loading ? "Saving..." : "Save Identity"}
+          </button>
+          
+          <button
+            onClick={async () => {
+              if (confirm("Are you sure you want to permanently delete your account? This cannot be undone.")) {
+                try {
+                  await fetch("/api/profile", { method: "DELETE" });
+                  await logout();
+                } catch (e) {
+                  alert("Failed to delete account");
+                }
+              }
+            }}
+            className="w-full py-3 rounded-full font-medium text-red-400 bg-red-400/10 hover:bg-red-400/20 active:scale-[0.98] transition-all text-sm tracking-wide"
+          >
+            Permanently Delete Account
           </button>
         </div>
 

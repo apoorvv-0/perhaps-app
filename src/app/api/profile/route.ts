@@ -103,9 +103,8 @@ export async function DELETE(req: NextRequest) {
   const session = await verifyToken(sessionToken);
   if (!session) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   
-  await prisma.user.update({
-    where: { id: session.userId },
-    data: { status: 'SUSPENDED' }
+  await prisma.user.delete({
+    where: { id: session.userId }
   });
   
   return NextResponse.json({ success: true });
