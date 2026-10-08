@@ -26,7 +26,7 @@ export default function PerhapsProfilePage() {
   useEffect(() => {
     if (!isLoading) {
       if (!session) { router.push("/"); return; }
-      if (!session.idVerificationStatus === "APPROVED") {
+      if (session.idVerificationStatus !== "APPROVED") {
         router.push("/verify-id");
         return;
       }

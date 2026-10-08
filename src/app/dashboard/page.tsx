@@ -59,7 +59,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!isLoading) {
       if (!session) router.push("/");
-      else if (!session.idVerificationStatus === "APPROVED") router.push("/verify-id");
+      else if (session.idVerificationStatus !== "APPROVED") router.push("/verify-id");
       else if (!session.profileComplete) router.push("/profile");
       else {
         fetchStatus();

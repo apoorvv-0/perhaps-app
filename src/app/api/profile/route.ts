@@ -24,7 +24,7 @@ const profileSchema = z.object({
 
 export async function GET() {
   const session = await getSession();
-  if (!session?.idVerificationStatus === "APPROVED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (session?.idVerificationStatus !== "APPROVED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const user = await prisma.user.findUnique({ where: { id: session.userId } });
   if (!user || user.status === "SUSPENDED" || user.firstName === "New") return NextResponse.json({ profile: null });
   return NextResponse.json({ profile: user });
@@ -32,7 +32,7 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   const session = await getSession();
-  if (!session?.idVerificationStatus === "APPROVED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (session?.idVerificationStatus !== "APPROVED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   
   const event = await getActiveEvent();
   let body: unknown;

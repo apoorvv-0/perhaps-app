@@ -50,7 +50,7 @@ export async function middleware(request: NextRequest) {
     if (!session) {
       return NextResponse.redirect(new URL("/", request.url));
     }
-    if (!session.idVerificationStatus === "APPROVED") {
+    if (session.idVerificationStatus !== "APPROVED") {
       return NextResponse.redirect(new URL("/verify-id", request.url));
     }
     if (!session.profileComplete && !pathname.startsWith("/profile")) {

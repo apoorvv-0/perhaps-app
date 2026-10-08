@@ -11,7 +11,7 @@ const bodySchema = z.object({
 
 export async function POST(request: NextRequest) {
   const session = await getSession();
-  if (!session?.idVerificationStatus === "APPROVED" || !session.profileComplete) {
+  if (session?.idVerificationStatus !== "APPROVED" || !session.profileComplete) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

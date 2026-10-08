@@ -117,8 +117,23 @@ export default function VerifyIdPage() {
         <p className="text-brand-taupe/80 max-w-sm font-light leading-relaxed mb-8">
           The Oracle is manually reviewing your College ID. Check back in a little while!
         </p>
-        <button onClick={logout} className="text-brand-taupe/50 hover:text-red-400 text-xs transition-colors">
+        <button onClick={logout} className="text-brand-taupe/50 hover:text-brand-blush text-xs transition-colors mb-4">
           Log out / Switch Account
+        </button>
+        <button
+          onClick={async () => {
+            if (confirm("Are you sure you want to permanently delete your account? This cannot be undone.")) {
+              try {
+                await fetch("/api/profile", { method: "DELETE" });
+                await logout();
+              } catch (e) {
+                alert("Failed to delete account");
+              }
+            }
+          }}
+          className="text-red-500/50 hover:text-red-400 text-xs underline transition-colors"
+        >
+          Permanently Delete Account
         </button>
       </div>
     );
@@ -216,9 +231,24 @@ export default function VerifyIdPage() {
           </button>
         </form>
 
-        <div className="mt-8 text-center">
-          <button onClick={logout} className="text-brand-taupe/50 hover:text-red-400 text-xs transition-colors">
+        <div className="mt-8 text-center flex flex-col gap-4">
+          <button onClick={logout} className="text-brand-taupe/50 hover:text-brand-blush text-xs transition-colors">
             Log out / Switch Account
+          </button>
+          <button
+            onClick={async () => {
+              if (confirm("Are you sure you want to permanently delete your account? This cannot be undone.")) {
+                try {
+                  await fetch("/api/profile", { method: "DELETE" });
+                  await logout();
+                } catch (e) {
+                  alert("Failed to delete account");
+                }
+              }
+            }}
+            className="text-red-500/50 hover:text-red-400 text-xs underline transition-colors"
+          >
+            Permanently Delete Account
           </button>
         </div>
       </div>
