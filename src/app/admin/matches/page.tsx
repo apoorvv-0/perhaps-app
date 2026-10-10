@@ -28,9 +28,13 @@ export default function AdminMatchesPage() {
       setLoadingPreview(true);
       const res = await fetch('/api/admin/matching/dry-run', { method: 'POST' });
       const data = await res.json();
+      if (data.error) {
+        alert("Error: " + data.error);
+      }
       if (data.matches) setPreviewMatches(data.matches);
     } catch (e) {
       console.error(e);
+      alert("Network error fetching preview");
     } finally {
       setLoadingPreview(false);
     }
