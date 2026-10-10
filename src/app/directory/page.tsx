@@ -172,7 +172,7 @@ export default function DirectoryPage() {
     );
   }
 
-  const isValidCount = picks.length === 0 || picks.length >= 3;
+  const isValidCount = true;
 
   return (
     <div className="min-h-screen bg-brand-wine text-brand-blush font-inter pb-64 relative">
@@ -287,7 +287,8 @@ export default function DirectoryPage() {
             </motion.div>
           );
         })}
-        {filtered.length === 0 && (
+        <div className="h-48 w-full pointer-events-none" />
+{filtered.length === 0 && (
           <div className="text-center py-16 text-brand-taupe">
             <p className="font-playfair text-xl italic mb-2">Nobody found</p>
             <p className="text-sm font-light">Try adjusting your filters.</p>
@@ -339,11 +340,7 @@ export default function DirectoryPage() {
                 </button>
               </div>
 
-              {!isValidCount && isChoosing && (
-                <div className="bg-brand-wine border border-brand-rose/20 rounded-2xl p-4 mb-6 text-sm text-brand-rose text-center font-medium shadow-inner">
-                  Pro tip: Select 3 or more mutuals to lock in your choices and increase your chances.
-                </div>
-              )}
+              
               {error && <div className="bg-red-950/20 border border-red-900/30 rounded-2xl p-4 mb-6 text-sm text-red-300 text-center">{error}</div>}
 
               <div className="flex-1 overflow-y-auto mb-6 pr-2 scrollbar-hide space-y-3">
@@ -386,6 +383,7 @@ export default function DirectoryPage() {
                 </div>
               )}
               
+              <div className="h-48 w-full shrink-0 pointer-events-none" />
               <div className="text-center h-4 mt-2">
                 <p className="text-xs text-brand-taupe font-medium tracking-wide">
                   {syncStatus === "saving" ? (
