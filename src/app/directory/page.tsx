@@ -175,7 +175,7 @@ export default function DirectoryPage() {
   const isValidCount = picks.length === 0 || picks.length >= 3;
 
   return (
-    <div className="min-h-screen bg-brand-wine text-brand-blush font-inter pb-40 relative">
+    <div className="min-h-screen bg-brand-wine text-brand-blush font-inter pb-64 relative">
       {/* Premium ambient glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] h-[400px] bg-brand-burgundy/20 rounded-full blur-[100px] pointer-events-none" />
 
