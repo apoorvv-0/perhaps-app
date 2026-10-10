@@ -28,7 +28,7 @@ export default function DirectoryPage() {
   const [syncStatus, setSyncStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const [maxAllowed, setMaxAllowed] = useState(3);
+  const [maxAllowed, setMaxAllowed] = useState(10);
   const [showCouponModal, setShowCouponModal] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [couponError, setCouponError] = useState("");
@@ -137,8 +137,7 @@ export default function DirectoryPage() {
       setHasUnsavedChanges(true);
     } else {
       if (picks.length >= maxAllowed) {
-        // We removed the hard block. We just open the drawer to show the upsell.
-        setShowCouponModal(true);
+        alert(`You can only pick up to ${maxAllowed} people.`);
         return;
       }
       setPicks([...picks, id]);
@@ -380,12 +379,10 @@ export default function DirectoryPage() {
               {isChoosing && (
                 <div className="bg-brand-wine/40 rounded-[24px] p-5 border border-brand-burgundy/30 mb-4">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-brand-blush">Need more slots?</span>
+                    
                     <span className="text-xs font-bold text-brand-taupe">{picks.length}/{maxAllowed} Used</span>
                   </div>
-                  <button onClick={() => setShowCouponModal(true)} className="w-full py-4 bg-transparent border border-brand-rose/20 text-brand-rose rounded-full font-medium text-sm hover:bg-brand-rose/5 transition-colors">
-                    Unlock extra choices
-                  </button>
+                  
                 </div>
               )}
               
@@ -411,49 +408,7 @@ export default function DirectoryPage() {
         )}
       </AnimatePresence>
 
-      {/* Coupon Modal */}
-      <AnimatePresence>
-        {showCouponModal && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-brand-wine/90 backdrop-blur-md" onClick={() => setShowCouponModal(false)} />
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative bg-brand-charcoal border border-brand-burgundy/50 rounded-[32px] p-8 w-full max-w-sm text-center shadow-[0_24px_64px_rgba(0,0,0,0.5)]">
-              <h2 className="font-playfair text-3xl font-bold mb-3 text-brand-blush">Expand List</h2>
-              <p className="text-brand-taupe text-sm mb-8 leading-relaxed">
-                First 3 choices are free.<br/>
-                Next 3 slots = ₹69.<br/>
-                Every 3 slots after = ₹49.<br/>
-                <span className="text-brand-taupe/60 text-xs mt-2 block">(Max 15 total slots)</span>
-              </p>
-              
-              <a href="https://instagram.com/perhaps.app" target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 w-full py-4 bg-brand-wine text-brand-rose rounded-full font-medium text-sm hover:bg-brand-burgundy/40 transition-colors mb-8 shadow-sm">
-                Get Coupon via Instagram
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-              </a>
-
-              <div className="relative mb-8">
-                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-brand-burgundy/30"></div></div>
-                <div className="relative flex justify-center"><span className="bg-brand-charcoal px-4 text-xs text-brand-taupe uppercase tracking-widest">Or apply code</span></div>
-              </div>
-
-              <form onSubmit={redeemCoupon} className="flex flex-col gap-5">
-                <input 
-                  type="text" 
-                  placeholder="8-CHAR CODE"
-                  value={couponCode}
-                  onChange={e => setCouponCode(e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase())}
-                  className="w-full bg-brand-wine border border-brand-burgundy/50 text-brand-rose px-6 py-4 rounded-2xl text-center tracking-widest font-mono text-base uppercase placeholder:text-brand-taupe/50 focus:outline-none focus:border-brand-rose/50 shadow-inner"
-                  maxLength={8}
-                  required
-                />
-                {couponError && <p className="text-red-400 text-xs font-medium">{couponError}</p>}
-                <button type="submit" disabled={couponLoading || couponCode.length !== 8} className="w-full py-4 bg-brand-blush text-brand-wine font-bold rounded-full disabled:opacity-50 active:scale-[0.98] transition-transform shadow-[0_8px_24px_rgba(246,215,207,0.2)]">
-                  {couponLoading ? "Verifying..." : "Redeem"}
-                </button>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      
 
       <BottomTabBar />
     </div>

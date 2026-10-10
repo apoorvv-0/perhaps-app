@@ -11,16 +11,8 @@ import { z } from "zod";
 
 
 async function calculateMaxChoices(userId: string, eventId: string) {
-  const coupons = await prisma.coupon.findMany({
-    where: { redeemedBy: userId, eventId, status: 'REDEEMED' }
-  });
-  const totalSpent = coupons.reduce((acc, c) => acc + c.faceValue, 0);
-  let maxChoicesAllowed = 3;
-  if (totalSpent >= 21600) maxChoicesAllowed = 15;
-  else if (totalSpent >= 16700) maxChoicesAllowed = 12;
-  else if (totalSpent >= 11800) maxChoicesAllowed = 9;
-  else if (totalSpent >= 6900) maxChoicesAllowed = 6;
-  return maxChoicesAllowed;
+  // Paywall removed - 10 free choices
+  return 10;
 }
 
 export async function GET() {

@@ -300,8 +300,7 @@ export default function Dashboard() {
                   </div>
                   <h2 className="font-playfair text-3xl font-normal text-brand-blush mb-4 italic">The Rules</h2>
                   <p className="text-brand-taupe/80 text-sm leading-relaxed font-light mb-12">
-                    You have <strong className="text-brand-rose">3 free slots</strong> to submit the names of those you desire.
-                    If you need more, the Cashier can grant you extra slots.
+                    You have <strong className="text-brand-rose">10 slots</strong> to submit the names of those you desire.
                     Choose wisely.
                   </p>
                   <button onClick={() => setLoreStep(2)} className="w-full py-4 bg-brand-blush text-brand-wine font-bold rounded-full uppercase tracking-widest text-xs">Acknowledge</button>
