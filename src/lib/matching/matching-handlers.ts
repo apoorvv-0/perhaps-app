@@ -61,9 +61,9 @@ export async function POST_DRY_RUN(request: NextRequest) {
   }
 
   const event = await getActiveEvent();
-  if (!event || (event.status !== "CHOOSING_CLOSED" && event.status !== "MATCHING")) {
+  if (!event || (event.status !== "CHOOSING_OPEN" && event.status !== "CHOOSING_CLOSED" && event.status !== "MATCHING")) {
     return NextResponse.json(
-      { error: "Matching can only run after Choosing is closed." },
+      { error: "Matching preview requires choosing to be open or closed." },
       { status: 400 }
     );
   }
